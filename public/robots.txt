@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /pricing
+Allow: /tutorials
+Allow: /docs
+Allow: /blog
+Allow: /status
+Allow: /changelog
+Allow: /contact
+Allow: /legal/*
+Disallow: /dashboard
+Disallow: /jobs
+Disallow: /jobs/*
+Disallow: /tokens
+Disallow: /settings
+Disallow: /auth/callback

@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background-rgb: 255 255 255;
+    --foreground-rgb: 43 43 43;
+    --card-rgb: 255 255 255;
+    --card-foreground-rgb: 43 43 43;
+    
+    --primary-rgb: 142 112 207; /* #8E70CF */
+    --secondary-rgb: 181 199 235; /* #B5C7EB */
+    --muted-rgb: 212 212 212; /* #D4D4D4 */
+    --muted-foreground-rgb: 110 110 110;
+    --border-rgb: 212 212 212; /* #D4D4D4 */
+    --accent-rgb: 158 240 255; /* #9EF0FF */
+    --ring-rgb: 164 165 245; /* #A4A5F5 */
+  }
+
+  .dark {
+    --background-rgb: 43 43 43; /* #2B2B2B */
+    --foreground-rgb: 255 255 255;
+    --card-rgb: 31 31 31; /* #1F1F1F */
+    --card-foreground-rgb: 255 255 255;
+    
+    --primary-rgb: 164 165 245; /* #A4A5F5 */
+    --secondary-rgb: 142 112 207; /* #8E70CF */
+    --muted-rgb: 61 61 61; /* #3D3D3D */
+    --muted-foreground-rgb: 179 179 179; /* #B3B3B3 */
+    --border-rgb: 61 61 61; /* #3D3D3D */
+    --accent-rgb: 158 240 255; /* #9EF0FF */
+    --ring-rgb: 164 165 245; /* #A4A5F5 */
+  }
+
+  /* Cyberpunk / Neon Theme */
+  .theme-neon {
+    --background-rgb: 12 10 24;
+    --foreground-rgb: 242 240 255;
+    --card-rgb: 22 18 42;
+    --card-foreground-rgb: 242 240 255;
+    --primary-rgb: 255 0 216; /* Neon pink */
+    --secondary-rgb: 0 240 255; /* Cyber cyan */
+    --border-rgb: 45 35 75;
+    --muted-rgb: 35 28 62;
+    --muted-foreground-rgb: 160 148 190;
+  }
+
+  /* Steel / Metallic Theme */
+  .theme-metallic {
+    --background-rgb: 240 242 245;
+    --foreground-rgb: 33 37 41;
+    --card-rgb: 255 255 255;
+    --card-foreground-rgb: 33 37 41;
+    --primary-rgb: 73 80 87; /* Slate steel */
+    --secondary-rgb: 108 117 125;
+    --border-rgb: 222 226 230;
+    --muted-rgb: 233 236 239;
+    --muted-foreground-rgb: 108 117 125;
+  }
+
+  /* Translucent / Glassy Theme */
+  .theme-glassy {
+    --background-rgb: 255 255 255;
+    --foreground-rgb: 15 23 42;
+    --card-rgb: 255 255 255;
+    --card-foreground-rgb: 15 23 42;
+    --primary-rgb: 99 102 241; /* Indigo */
+    --secondary-rgb: 244 63 94; /* Rose */
+    --border-rgb: 241 245 249;
+    --muted-rgb: 248 250 252;
+    --muted-foreground-rgb: 100 116 139;
+  }
+
+  /* High Contrast / Bright Theme */
+  .theme-bright {
+    --background-rgb: 253 253 250;
+    --foreground-rgb: 10 10 10;
+    --card-rgb: 255 255 255;
+    --card-foreground-rgb: 10 10 10;
+    --primary-rgb: 245 158 11; /* Bright amber */
+    --secondary-rgb: 239 68 68; /* Bright red */
+    --border-rgb: 229 231 235;
+    --muted-rgb: 243 244 246;
+    --muted-foreground-rgb: 75 85 99;
+  }
+
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+code, pre {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09090b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+@keyframes aurora {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-aurora {
+  background: linear-gradient(270deg, #10b981, #ec4899, #ffffff, #3b82f6, #10b981);
+  background-size: 400% 400%;
+  animation: aurora 8s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
