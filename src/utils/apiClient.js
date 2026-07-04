@@ -1,6 +1,7 @@
 import { useAuthStore } from '../store/authStore.js';
 
-const BACKEND_API_URL = 'http://localhost:4000/api/v1';
+const backendOrigin = import.meta.env.VITE_BACKEND_API_URL || 'https://apicoolie-backend.onrender.com';
+const BACKEND_API_URL = `${backendOrigin}/api/v1`;
 
 async function request(endpoint, options = {}) {
   const token = useAuthStore.getState().token;

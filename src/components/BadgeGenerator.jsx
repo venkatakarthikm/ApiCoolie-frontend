@@ -40,10 +40,11 @@ export function BadgeGenerator({ jobId, jobName }) {
   }
 
   // Build target URL paths
-  const baseBadgeUrl = `http://localhost:4000/badge/${badge.slug}`;
+  const backendUrl = import.meta.env.VITE_BACKEND_API_URL || 'https://apicoolie-backend.onrender.com';
+  const baseBadgeUrl = `${backendUrl}/badge/${badge.slug}`;
   const svgUrl = `${baseBadgeUrl}.svg`;
   const jsonUrl = `${baseBadgeUrl}.json`;
-  const targetDashboardUrl = `http://localhost:5173/jobs/${jobId}`;
+  const targetDashboardUrl = `${window.location.origin}/jobs/${jobId}`;
 
   // Snippets
   const markdownSnippet = `[![Api Coolie Status](${svgUrl})](${targetDashboardUrl})`;

@@ -15,7 +15,7 @@ export function WorkerUrlPanel({ job }) {
   const [suggestions, setSuggestions] = useState([]);
   const [showWarningModal, setShowWarningModal] = useState(false);
 
-  const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL || 'http://localhost:4000';
+  const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL || 'https://apicoolie-backend.onrender.com';
   const workerUrl = job.workerUrlSlug
     ? `${BACKEND_API_URL}/w/${job.workerUrlSlug}`
     : null;
