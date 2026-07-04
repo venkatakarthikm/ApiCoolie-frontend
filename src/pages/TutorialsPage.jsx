@@ -187,7 +187,8 @@ fetch('https://api.ipify.org?format=json')
     { id: 'slack', label: 'Uptime Slack Alerter', icon: Slack, desc: 'Set up automated monitoring of endpoints with Slack notifications.' },
     { id: 'db', label: 'Neon Database Cleanup', icon: Database, desc: 'Clean old records and run VACUUM operations on a Neon Postgres instance.' },
     { id: 'hmac', label: 'HMAC Webhook Signer', icon: Lock, desc: 'Verify incoming scheduled webhooks securely on your backend.' },
-    { id: 'json', label: 'JSON Schema Validator', icon: Globe, desc: 'Fetch JSON API payloads, validate fields, and alert on syntax mismatches.' }
+    { id: 'json', label: 'JSON Schema Validator', icon: Globe, desc: 'Fetch JSON API payloads, validate fields, and alert on syntax mismatches.' },
+    { id: 'worker', label: 'Worker URL + Privacy', icon: Code2, desc: 'Trigger jobs via HTTP and configure response privacy redaction filters.' }
   ];
 
   let tutTitle = 'Developer Tutorials';
@@ -205,6 +206,9 @@ fetch('https://api.ipify.org?format=json')
   } else if (activeTab === 'json') {
     tutTitle = 'Automated JSON Payload Validation Tutorial';
     tutDesc = 'Learn how to parse API responses, validate parameters against schemas, and trigger alerts inside isolated V8 sandboxes.';
+  } else if (activeTab === 'worker') {
+    tutTitle = 'Worker URL & Response Privacy Filters Tutorial';
+    tutDesc = 'Learn how to expose your job as a public HTTP endpoint and configure recursive response redaction to mask sensitive data.';
   }
 
   return (
@@ -405,6 +409,63 @@ fetch('https://api.ipify.org?format=json')
                   {jsonCode}
                 </pre>
               </div>
+            </div>
+          </div>
+        )}
+        {activeTab === 'worker' && (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-xl font-extrabold text-foreground">Worker URL & Response Privacy Filters</h2>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                This tutorial demonstrates how to enable a Worker URL for an Api job that fetches cricket stats data, then configure response filters to strip the player ID and sensitive fields from all outputs automatically.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-extrabold text-foreground">Step 1: Create a Python Code Job</h3>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                Go to Jobs > Create New Job. Select <strong>Code Runner</strong>, language <strong>Python</strong>, and paste the following script:
+              </p>
+              <div className="relative border border-border/40 rounded-2xl bg-card overflow-hidden">
+                <div className="absolute right-3 top-3 z-10">
+                  <CopyButton value={`import urllib.request, json
+with urllib.request.urlopen('https://trackwicketbackend-kscl.onrender.com/api/stats/most-runs/odi/all') as r:
+    data = json.loads(r.read().decode())
+    print(json.dumps(data, indent=2))`} label="Copy Script" />
+                </div>
+                <pre className="p-4 text-[10px] overflow-x-auto bg-muted/5 font-mono leading-relaxed text-muted-foreground">{`import urllib.request, json
+with urllib.request.urlopen('https://trackwicketbackend-kscl.onrender.com/api/stats/most-runs/odi/all') as r:
+    data = json.loads(r.read().decode())
+    print(json.dumps(data, indent=2))`}</pre>
+              </div>
+
+              <h3 className="text-sm font-extrabold text-foreground pt-2">Step 2: Enable the Worker URL</h3>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                In the job's <strong>Settings</strong> tab, scroll to Worker URL. Click <strong>Generate URL</strong> or set a custom slug like <code>cricket-stats</code>. Once enabled, calling:
+              </p>
+              <div className="border border-border/40 rounded-2xl bg-muted/5 p-4 font-mono text-xs text-primary">
+                GET https://apicoolie-backend.onrender.com/w/cricket-stats
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                will run the script and return the JSON response directly. No authentication required.
+              </p>
+
+              <h3 className="text-sm font-extrabold text-foreground pt-2">Step 3: Configure Response Privacy Filters</h3>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                If the API response contains sensitive fields like player IDs or personal data, configure the Response Privacy Filter in the job's Settings tab. Example raw API response:
+              </p>
+              <pre className="p-4 text-[10px] overflow-x-auto bg-muted/5 border border-border/40 rounded-2xl font-mono leading-relaxed text-muted-foreground">{`[
+  { "playerId": "IND-001", "playerName": "Rohit Sharma", "runs": 10709, "country": "India" },
+  { "playerId": "WI-002",  "playerName": "Chris Gayle",  "runs": 10480, "country": "West Indies" }
+]`}</pre>
+              <p className="text-sm text-muted-foreground">Add <strong>playerId</strong> to the Blocked Keys list. The stored output and Worker URL response will become:</p>
+              <pre className="p-4 text-[10px] overflow-x-auto bg-muted/5 border border-border/40 rounded-2xl font-mono leading-relaxed text-muted-foreground">{`[
+  { "playerName": "Rohit Sharma", "runs": 10709, "country": "India" },
+  { "playerName": "Chris Gayle",  "runs": 10480, "country": "West Indies" }
+]`}</pre>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Filters apply recursively across nested objects and array items. You can also use <strong>Blocked Text</strong> to mask specific values like email addresses or tokens that appear as string values.
+              </p>
             </div>
           </div>
         )}

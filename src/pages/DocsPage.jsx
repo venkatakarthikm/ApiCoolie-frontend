@@ -73,9 +73,10 @@ def verify_webhook(payload, signature_header, secret_token):
     { id: 'started', title: 'Getting Started & Architecture', icon: BookOpen },
     { id: 'cron', title: 'Advanced Cron Scheduler Rules', icon: Calendar },
     { id: 'vm', title: 'Isolated-VM V8 Runtime Spec', icon: Terminal },
+    { id: 'worker', title: 'Worker URLs & Response Redaction', icon: Globe },
     { id: 'sec', title: 'Webhook Security & HMAC Signatures', icon: Shield },
     { id: 'api', title: 'Programmatic REST API Keys', icon: Key },
-    { id: 'json', title: 'JSON Formatter & Schema Suite', icon: Globe },
+    { id: 'json', title: 'JSON Formatter & Schema Suite', icon: Database },
     { id: 'faq', title: 'Developer FAQ & Troubleshooting', icon: HelpCircle },
   ];
 
@@ -88,6 +89,9 @@ def verify_webhook(payload, signature_header, secret_token):
   } else if (activeSection === 'vm') {
     docTitle = 'Isolated-VM V8 Runtime Specification';
     docDesc = 'Detailed reference specification for running scheduled JavaScript scripts securely inside isolated V8 isolates.';
+  } else if (activeSection === 'worker') {
+    docTitle = 'Worker URLs & Response Redaction';
+    docDesc = 'Configure public HTTP trigger endpoints and privacy filters that redact sensitive JSON keys and text patterns from execution outputs.';
   } else if (activeSection === 'sec') {
     docTitle = 'Webhook Security & HMAC Verification';
     docDesc = 'Protect your endpoints from webhook injection attacks using cryptographic SHA-256 HMAC header verification.';
@@ -401,6 +405,67 @@ def verify_webhook(payload, signature_header, secret_token):
           </div>
         )}
 
+        {activeSection === 'worker' && (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-sans">Worker URLs & Response Redaction</h1>
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+              Worker URLs let you trigger any job on-demand via a simple HTTP request to a public endpoint. Response Redaction Filters let you strip sensitive keys and phrases from all outputs before they are stored, forwarded via webhook, or served through the Worker URL.
+            </p>
+
+            <div className="space-y-4">
+              <h3 className="font-extrabold text-sm text-foreground">Enabling a Worker URL</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Open any job's Settings tab and navigate to Worker URL. You can generate a random secure slug or set a custom one. Once enabled, any HTTP request to:
+              </p>
+              <div className="border border-border/40 rounded-2xl bg-muted/5 p-4 font-mono text-xs text-primary">
+                GET https://apicoolie-backend.onrender.com/w/YOUR-SLUG
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                will immediately execute the job and return the output in the HTTP response body. Both API and Code jobs support Worker URLs. JSON outputs are returned with <code>application/json</code> content-type automatically.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="font-extrabold text-sm text-foreground">Response Redaction Filters</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                You may define a list of blocked JSON keys and blocked text phrases per job. Filters run recursively across all nested objects and arrays.
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Example: if your API returns:
+              </p>
+              <div className="relative border border-border/40 rounded-2xl bg-card overflow-hidden">
+                <CopyButton value={`{\n  "id": 1,\n  "name": "Arjun Reddy",\n  "email": "arjun@example.com",\n  "score": 98\n}`} label="Copy" />
+                <pre className="p-4 text-xs font-mono text-muted-foreground bg-muted/5 overflow-x-auto">{`{
+  "id": 1,
+  "name": "Arjun Reddy",
+  "email": "arjun@example.com",
+  "score": 98
+}`}</pre>
+              </div>
+              <p className="text-xs text-muted-foreground">After setting <strong>Blocked Keys: id, email</strong>, the stored and dispatched output becomes:</p>
+              <div className="relative border border-border/40 rounded-2xl bg-card overflow-hidden">
+                <CopyButton value={`{\n  "name": "Arjun Reddy",\n  "score": 98\n}`} label="Copy" />
+                <pre className="p-4 text-xs font-mono text-muted-foreground bg-muted/5 overflow-x-auto">{`{
+  "name": "Arjun Reddy",
+  "score": 98
+}`}</pre>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                <strong>Blocked Text</strong> phrases replace matching string values anywhere in the response with <code>[REDACTED]</code>. This is useful for hiding email addresses, PII, or tokens that appear as values (not keys).
+              </p>
+            </div>
+
+            <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl space-y-2">
+              <h4 className="font-extrabold text-xs text-amber-600 flex items-center gap-1.5">
+                <AlertCircle className="h-4 w-4" /> Filter Scope
+              </h4>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Redaction filters apply simultaneously to: execution history logs stored in the database, webhook dispatch payloads, and Worker URL HTTP responses. Filters are not applied retroactively to past logs.
+              </p>
+            </div>
+          </div>
+        )}
+
         {activeSection === 'faq' && (
           <div className="space-y-6">
             <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-sans">Developer FAQ & Troubleshooting</h1>
@@ -409,19 +474,31 @@ def verify_webhook(payload, signature_header, secret_token):
               {[
                 { 
                   q: "Why is my Code Job returning a Timeout Exception?", 
-                  a: "Code Jobs must finish execution within 5,000 milliseconds. If you are querying multiple external APIs in a serial fashion or attempting heavy math computations, the sandbox will terminate. Optimize script performance by executing operations asynchronously with Promise.all() or chunking tasks." 
+                  a: "JavaScript Code Jobs must finish within 5,000ms. Python Code Jobs have a configurable default of 15,000ms. If you are querying multiple APIs serially or doing heavy computation, the sandbox will terminate. Optimize with Promise.all() or split long tasks across multiple jobs." 
                 },
                 { 
                   q: "How can I trigger my jobs externally on demand?", 
-                  a: "Enable the 'Worker URL' feature inside the job settings panel. This creates a unique endpoint slug (e.g. /w/prune-tables). Sending an HTTP request directly to this address will execute the job synchronously and return the logs in the response body." 
+                  a: "Enable the Worker URL feature in the job settings. This creates a unique public slug (e.g. /w/prune-tables). Any HTTP request to this URL immediately executes the job and returns the output in the response body. Both API and Code jobs support Worker URLs." 
                 },
                 { 
                   q: "What is SSRF filtering, and why is my local endpoint blocked?", 
-                  a: "To prevent Server-Side Request Forgery (SSRF) attacks, the Api Coolie scheduler disallows outbound calls to loopback IP addresses (like localhost, 127.0.0.1) and private subnets (like 10.0.0.0/8 or 192.168.0.0/16). All target endpoints must be public facing and protected by secure authentication." 
+                  a: "To prevent Server-Side Request Forgery attacks, Api Coolie blocks outbound requests to loopback IPs (localhost, 127.0.0.1) and private network ranges (10.0.0.0/8, 192.168.0.0/16). All target endpoints must be public-facing with proper authentication." 
                 },
                 { 
                   q: "Does Api Coolie support npm dependencies inside sandboxes?", 
-                  a: "For security and runtime integrity, sandboxes block arbitrary package downloads. Common utilities such as the Node postgres client ('pg') are pre-loaded. If your task requires complex packages, write an API Job that delegates work to a secure external worker endpoint on your own servers." 
+                  a: "For security and runtime integrity, sandboxes block arbitrary package downloads. Common utilities are pre-loaded. For complex packages, write an API Job that delegates to a secure external endpoint on your own servers." 
+                },
+                {
+                  q: "How do I use multiple accounts in the same browser?",
+                  a: "Click your profile avatar in the top-right corner of the dashboard. Under 'Switch Accounts', you will see all saved sessions. Click 'Add Account' to log in with a second account without logging out of the first. You can switch between accounts instantly — the page reloads to clear in-memory state and prevent data overlap."
+                },
+                {
+                  q: "Why isn't my response filter removing the 'id' field?",
+                  a: "Filters are applied only to NEW executions after the filter is configured and saved. Previously stored execution logs are not modified retroactively. Also ensure the field name matches exactly (case-sensitive). Redaction is recursive — it will remove the key from nested objects and array items as well."
+                },
+                {
+                  q: "My PATCH job config update is failing with a 500 error.",
+                  a: "Ensure your request body includes either apiConfig or codeConfig matching the job type. Fields that are optional (runtimeVersion, timeoutMs, envVars) can be omitted — the server will preserve existing values. If responseFilter is included, it must be a JSON object with 'blockedKeys' (array of strings) and 'blockedText' (array of strings) fields."
                 }
               ].map(({ q, a }, idx) => (
                 <div key={idx} className="space-y-1.5 p-4 border border-border/40 rounded-2xl bg-muted/5">

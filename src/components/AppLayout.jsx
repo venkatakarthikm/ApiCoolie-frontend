@@ -100,8 +100,8 @@ export function AppLayout() {
   }
 
   const handleLogout = () => {
+    // authStore.logout() handles redirect internally
     logout();
-    navigate('/login');
   };
 
   const navSections = [

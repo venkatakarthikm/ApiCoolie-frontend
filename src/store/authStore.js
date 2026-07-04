@@ -29,7 +29,7 @@ export const useAuthStore = create((set, get) => ({
     localStorage.setItem('ac_token', token);
     localStorage.setItem('ac_user', JSON.stringify(user));
 
-    // 2. Add or update in accounts list
+    // 2. Add or update in accounts list — always persist the logged-in account
     let currentAccounts = [];
     try {
       const raw = localStorage.getItem('ac_accounts');
@@ -38,6 +38,7 @@ export const useAuthStore = create((set, get) => ({
 
     const index = currentAccounts.findIndex(acc => acc.user.id === user.id);
     if (index !== -1) {
+      // Update token in case it refreshed
       currentAccounts[index] = { token, user };
     } else {
       currentAccounts.push({ token, user });
@@ -82,7 +83,8 @@ export const useAuthStore = create((set, get) => ({
   },
 
   switchAccount: (userId) => {
-    const target = get().accounts.find(acc => acc.user.id === userId);
+    const allAccounts = get().accounts;
+    const target = allAccounts.find(acc => acc.user.id === userId);
     if (!target) return;
 
     localStorage.setItem('ac_token', target.token);
@@ -90,12 +92,24 @@ export const useAuthStore = create((set, get) => ({
 
     set({ token: target.token, user: target.user, isAuthenticated: true });
 
-    // Reload the page to clear any in-memory state or cache of the old account
-    window.location.href = '/jobs';
+    // Reload current page (not redirect to /jobs) to clear in-memory state
+    window.location.reload();
   },
 
   addAccount: () => {
-    // Keep ac_accounts in localStorage, but clear current active session
+    // Save the CURRENT session into the accounts pool before clearing it
+    // so users can switch back to it later
+    const current = get();
+    if (current.token && current.user) {
+      let currentAccounts = current.accounts;
+      const index = currentAccounts.findIndex(acc => acc.user.id === current.user.id);
+      if (index === -1) {
+        currentAccounts = [...currentAccounts, { token: current.token, user: current.user }];
+        localStorage.setItem('ac_accounts', JSON.stringify(currentAccounts));
+        set({ accounts: currentAccounts });
+      }
+    }
+    // Now clear the active session so user can log in with a new account
     localStorage.removeItem('ac_token');
     localStorage.removeItem('ac_user');
     set({ token: null, user: null, isAuthenticated: false });

@@ -9,11 +9,19 @@ export function ChangelogPage() {
       date: 'July 05, 2026',
       badge: 'Latest',
       changes: [
-        { type: 'added', text: 'Interactive Response Redaction & Privacy Filters panel to mask sensitive keys or text values recursively.' },
+        { type: 'added', text: 'Interactive Response Redaction & Privacy Filters panel to mask sensitive JSON keys or text values recursively in all outputs.' },
         { type: 'added', text: 'Synchronous API test run execution and structured output console at the bottom of API job configurations.' },
-        { type: 'added', text: 'Worker URL support for API jobs, enabling direct payload and header triggers.' },
-        { type: 'changed', text: 'Configured white-space pre-wrap styling on response log pre containers to render multiline JSON structures nicely.' },
-        { type: 'fixed', text: 'Resolved Worker URL response format issues, returning properly structured application/json data headers.' }
+        { type: 'added', text: 'Worker URL support for API jobs, enabling direct HTTP triggers with JSON-formatted responses.' },
+        { type: 'added', text: 'Multi-account session switcher in the dashboard profile dropdown — log in with multiple accounts and switch without losing sessions.' },
+        { type: 'added', text: 'New "Worker URLs & Response Redaction" section in the Docs page with live JSON before/after examples.' },
+        { type: 'added', text: 'New "Worker URL + Privacy" tutorial tab in the Tutorials page with a Python cricket stats + data masking walkthrough.' },
+        { type: 'added', text: 'New blog post: Worker URLs and Response Privacy Filters — Build Public Endpoints with Data Masking.' },
+        { type: 'changed', text: 'Whitespace pre-wrap styling on response log containers to render multiline JSON nicely instead of single-line.' },
+        { type: 'changed', text: 'Rebuilt Privacy Policy, Terms of Service, and Security documents with natural language headings and new sections for response filters and multi-account sessions.' },
+        { type: 'fixed', text: 'Resolved 500 Internal Server Error on PATCH /api/v1/jobs/:id when optional codeConfig fields (runtimeVersion, timeoutMs, envVars) were omitted — server now safely preserves existing values.' },
+        { type: 'fixed', text: 'First login account now correctly saved to the account switcher pool automatically without needing to re-add manually.' },
+        { type: 'fixed', text: 'Account switcher now reloads the current page instead of redirecting to /jobs, preserving the active tab.' },
+        { type: 'fixed', text: 'Worker URL response format — outputs that are valid JSON are returned with application/json content-type automatically.' },
       ],
     },
     {

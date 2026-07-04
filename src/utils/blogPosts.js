@@ -869,7 +869,7 @@ Building dynamic redaction regex masks protects credentials from leaking into lo
 ### 1. Redaction Filter
 Below is a Node.js utility to scrub logs before writing:
 \`\`\`javascript
-const SECRETS_REGEX = /(postgres:\\/\\/|bearer |password=)([^\\s"']+)/gi;
+const SECRETS_REGEX = /(postgres:\/\/|bearer |password=)([^\s"']+)/gi;
 
 function maskLogs(rawText) {
   return rawText.replace(SECRETS_REGEX, "$1[REDACTED]");
@@ -877,6 +877,118 @@ function maskLogs(rawText) {
 console.log(maskLogs("Connection: postgres://admin:secret@host/db"));
 // Connection: postgres://[REDACTED]
 \`\`\`
+`
+  },
+  {
+    slug: 'worker-urls-and-response-privacy',
+    title: 'Worker URLs and Response Privacy Filters: Build Public Endpoints with Data Masking',
+    date: 'July 5, 2026',
+    author: 'Karthik S.',
+    readTime: '12 min read',
+    tag: 'Feature',
+    summary: 'Learn how to expose any Api Coolie job as a public HTTP endpoint using Worker URLs, and configure recursive response privacy filters to automatically strip sensitive JSON keys and text values before they are stored, forwarded, or served publicly.',
+    content: `## What are Worker URLs?
+
+Worker URLs are unique public HTTP endpoints generated per-job on Api Coolie. When enabled, any incoming HTTP request to your Worker URL slug immediately triggers the associated job execution and returns the response body inline.
+
+This is useful for:
+- Triggering jobs from external CI/CD pipelines or deployment scripts
+- Exposing job outputs as lightweight API endpoints for dashboards or third-party consumers
+- Building webhook-style integrations without managing a separate server
+
+## Enabling a Worker URL
+
+1. Open any job from the Jobs list and navigate to the **Settings** tab.
+2. Scroll to **Worker URL Settings** and click **Generate URL**.
+3. Optionally set a custom human-readable slug (e.g. \`cricket-stats\`).
+4. Once enabled, call your endpoint:
+
+\`\`\`bash
+curl https://apicoolie-backend.onrender.com/w/cricket-stats
+\`\`\`
+
+If your job is a Code Runner (Python or JavaScript), the script executes and its stdout output is returned as the response body. If the output is valid JSON, the response is automatically returned with \`Content-Type: application/json\`.
+
+For API jobs, the outbound HTTP request is made and the response is forwarded back to the Worker URL caller.
+
+## Example: Python Script as a Public Endpoint
+
+Here is a Python Code Job that fetches cricket stats and returns JSON:
+
+\`\`\`python
+import urllib.request, json
+with urllib.request.urlopen('https://trackwicketbackend-kscl.onrender.com/api/stats/most-runs/odi/all') as r:
+    data = json.loads(r.read().decode())
+    print(json.dumps(data, indent=2))
+\`\`\`
+
+When the Worker URL receives a GET request, it runs this script and returns:
+
+\`\`\`json
+[
+  { "playerId": "IND-001", "playerName": "Rohit Sharma", "runs": 10709, "country": "India" },
+  { "playerId": "WI-002",  "playerName": "Chris Gayle",  "runs": 10480, "country": "West Indies" }
+]
+\`\`\`
+
+## Response Privacy Filters: Masking Sensitive Data
+
+The Response Privacy Filter system lets you define per-job rules that strip or mask sensitive fields before the output is:
+- Stored in execution history logs
+- Dispatched via webhook
+- Served through the Worker URL
+
+### Blocked Keys
+
+Add JSON key names to the **Blocked Keys** list. The filter runs **recursively** across all nested objects and arrays.
+
+Example: blocking \`playerId\` transforms the above response to:
+
+\`\`\`json
+[
+  { "playerName": "Rohit Sharma", "runs": 10709, "country": "India" },
+  { "playerName": "Chris Gayle",  "runs": 10480, "country": "West Indies" }
+]
+\`\`\`
+
+All matching keys are deleted at every nesting depth.
+
+### Blocked Text Patterns
+
+Add specific string values to the **Blocked Text** list to replace them with \`[REDACTED]\` wherever they appear as values.
+
+Example: if you add \`arjun@example.com\` to Blocked Text and your API returns:
+
+\`\`\`json
+{ "name": "Arjun", "email": "arjun@example.com", "score": 98 }
+\`\`\`
+
+The stored and served output becomes:
+
+\`\`\`json
+{ "name": "Arjun", "email": "[REDACTED]", "score": 98 }
+\`\`\`
+
+This is especially useful for PII (Personally Identifiable Information) masking, token obfuscation, and GDPR compliance.
+
+## Security Architecture
+
+Worker URLs are hardened against common attacks:
+
+- **No SSRF:** Internal IP ranges and localhost are blocked at the DNS layer. Scripts cannot route requests to private networks.
+- **Header Sanitization:** Scripts cannot override critical security headers (\`Content-Security-Policy\`, \`X-Frame-Options\`).
+- **HTML Sandboxing:** HTML outputs are wrapped in a strict CSP sandbox to block script execution.
+- **SVG XSS Protection:** Job names in status badge SVGs are XML-escaped before rendering.
+
+## Using the Response Output Console
+
+The execution output panel at the bottom of each job configuration now renders JSON with proper indentation and whitespace. Instead of collapsed single-line blobs, you see formatted multi-line outputs with syntax-highlighted structure — making debugging far more efficient.
+
+## Conclusion
+
+Worker URLs transform any scheduled job into a callable API endpoint accessible from anywhere. Combined with recursive privacy filters, you can publish partial or sanitized views of your data to dashboards, external consumers, or webhook receivers — without exposing raw credentials or sensitive fields.
+
+Configure both features from the job's Settings tab on Api Coolie.
 `
   }
 ];
