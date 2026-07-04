@@ -177,9 +177,11 @@ export function LandingPage() {
           <div className="animate-marquee gap-8">
             {[
               'CRON SCHEDULING', 'ISOLATED-VM SANDBOX', 'REST API TRIGGER', 'WEBHOOK DISPATCH',
-              'AI LOG DIAGNOSTIC', 'STATUS BADGES', 'REAL-TIME METRICS', 'JSON SUITE SUITE',
+              'AI LOG DIAGNOSTIC', 'STATUS BADGES', 'REAL-TIME METRICS', 'JSON FORMATTER SUITE',
+              'JSON SCHEMA VALIDATION', 'PAYLOAD SYNTAX CHECKER', 'V8 JSON RUNTIMES', 'HMAC SIGNATURES',
               'CRON SCHEDULING', 'ISOLATED-VM SANDBOX', 'REST API TRIGGER', 'WEBHOOK DISPATCH',
-              'AI LOG DIAGNOSTIC', 'STATUS BADGES', 'REAL-TIME METRICS', 'JSON SUITE SUITE'
+              'AI LOG DIAGNOSTIC', 'STATUS BADGES', 'REAL-TIME METRICS', 'JSON FORMATTER SUITE',
+              'JSON SCHEMA VALIDATION', 'PAYLOAD SYNTAX CHECKER', 'V8 JSON RUNTIMES', 'HMAC SIGNATURES'
             ].map((tag, idx) => (
               <span key={idx} className="text-xs font-extrabold tracking-widest text-muted-foreground/40 mx-4 block">
                 {tag}
