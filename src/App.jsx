@@ -36,6 +36,7 @@ import { ActivityLogPage } from './pages/ActivityLogPage.jsx';
 import { TemplatesPage } from './pages/TemplatesPage.jsx';
 import { BillingPage } from './pages/BillingPage.jsx';
 import { JsonFormatterPage } from './pages/JsonFormatterPage.jsx';
+import { VersusPage } from './pages/VersusPage.jsx';
 
 export default function App() {
   // Initialize dark/light mode classes on initial mount
@@ -74,6 +75,8 @@ export default function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/auth/callback" element={<OAuthCallbackPage />} />
         <Route path="/tutorials" element={<TutorialsPage />} />
+        <Route path="/versus" element={<VersusPage />} />
+        <Route path="/tools/json-formatter" element={<JsonFormatterPage />} />
       </Route>
 
       {/* 2. PROTECTED SHELL APP ROUTES */}

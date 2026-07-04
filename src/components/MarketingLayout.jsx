@@ -162,6 +162,8 @@ export function MarketingLayout() {
             <ul className="space-y-2">
               <li><Link to="/" className="hover:text-primary transition-colors">Features</Link></li>
               <li><Link to="/pricing" className="hover:text-primary transition-colors">Pricing</Link></li>
+              <li><Link to="/versus" className="hover:text-primary transition-colors">Compare Alternatives</Link></li>
+              <li><Link to="/tools/json-formatter" className="hover:text-primary transition-colors">JSON Formatter</Link></li>
               <li><Link to="/status" className="hover:text-primary transition-colors">System Status</Link></li>
             </ul>
           </div>

@@ -212,6 +212,44 @@ fetch('https://httpbin.org/html')
   });`
       }
     }
+  },
+  {
+    id: 'code-json-validator',
+    type: 'code',
+    title: 'JSON Schema Payload Validator',
+    description: 'Fetch JSON payload payloads dynamically, validate their properties against a structured schema, and trigger alerts on invalid data structures.',
+    config: {
+      name: 'JSON Schema Validator',
+      description: 'Fetch and validate API payloads structure.',
+      scheduleType: 'manual_only',
+      codeConfig: {
+        language: 'javascript',
+        sourceCode: `// Fetch JSON payload and validate key fields structure
+fetch('https://api.ipify.org?format=json')
+  .then(res => {
+    if (!res.ok) throw new Error("HTTP connection failed");
+    return res.json();
+  })
+  .then(data => {
+    console.log("Retrieved payload:", JSON.stringify(data));
+    
+    // Validate properties
+    if (!data.ip) {
+      throw new Error("Validation Failed: Missing 'ip' key inside JSON payload response.");
+    }
+    
+    console.log("Validation Succeeded: 'ip' parameter parsed successfully: " + data.ip);
+    response.status = 200;
+    response.body = { validated: true, data };
+  })
+  .catch(err => {
+    console.error("JSON Validator execution error:", err.message);
+    response.status = 500;
+    response.body = { error: err.message };
+    throw err; // In isolated-vm, throwing marks the schedule run as failed, triggering alerts
+  });`
+      }
+    }
   }
 ];
 

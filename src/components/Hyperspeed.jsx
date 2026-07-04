@@ -360,6 +360,9 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS, onWebGLFailed }) =
           antialias: false,
           alpha: true
         });
+        if (!this.renderer.getContext()) {
+          throw new Error("WebGL context not available");
+        }
         this.renderer.setSize(initW, initH, false);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.composer = new EffectComposer(this.renderer);
@@ -492,27 +495,32 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS, onWebGLFailed }) =
       }
 
       init() {
-        this.initPasses();
-        const options = this.options;
-        this.road.init();
-        this.leftCarLights.init();
+        try {
+          this.initPasses();
+          const options = this.options;
+          this.road.init();
+          this.leftCarLights.init();
 
-        this.leftCarLights.mesh.position.setX(-options.roadWidth / 2 - options.islandWidth / 2);
-        this.rightCarLights.init();
-        this.rightCarLights.mesh.position.setX(options.roadWidth / 2 + options.islandWidth / 2);
-        this.leftSticks.init();
-        this.leftSticks.mesh.position.setX(-(options.roadWidth + options.islandWidth / 2));
+          this.leftCarLights.mesh.position.setX(-options.roadWidth / 2 - options.islandWidth / 2);
+          this.rightCarLights.init();
+          this.rightCarLights.mesh.position.setX(options.roadWidth / 2 + options.islandWidth / 2);
+          this.leftSticks.init();
+          this.leftSticks.mesh.position.setX(-(options.roadWidth + options.islandWidth / 2));
 
-        this.container.addEventListener('mousedown', this.onMouseDown);
-        this.container.addEventListener('mouseup', this.onMouseUp);
-        this.container.addEventListener('mouseout', this.onMouseUp);
+          this.container.addEventListener('mousedown', this.onMouseDown);
+          this.container.addEventListener('mouseup', this.onMouseUp);
+          this.container.addEventListener('mouseout', this.onMouseUp);
 
-        this.container.addEventListener('touchstart', this.onTouchStart, { passive: true });
-        this.container.addEventListener('touchend', this.onTouchEnd, { passive: true });
-        this.container.addEventListener('touchcancel', this.onTouchEnd, { passive: true });
-        this.container.addEventListener('contextmenu', this.onContextMenu);
+          this.container.addEventListener('touchstart', this.onTouchStart, { passive: true });
+          this.container.addEventListener('touchend', this.onTouchEnd, { passive: true });
+          this.container.addEventListener('touchcancel', this.onTouchEnd, { passive: true });
+          this.container.addEventListener('contextmenu', this.onContextMenu);
 
-        this.tick();
+          this.tick();
+        } catch (e) {
+          console.warn("WebGL runtime init failed:", e);
+          if (this.options.onWebglFailed) this.options.onWebglFailed();
+        }
       }
 
       onMouseDown(ev) {
@@ -1167,7 +1175,13 @@ const Hyperspeed = ({ effectOptions = DEFAULT_EFFECT_OPTIONS, onWebGLFailed }) =
     try {
       const myApp = new App(container, options);
       appRef.current = myApp;
-      myApp.loadAssets().then(myApp.init);
+      myApp.loadAssets()
+        .then(myApp.init)
+        .catch(e => {
+          console.error("WebGL context creation failed inside Hyperspeed component:", e);
+          setWebglFailed(true);
+          onWebGLFailed?.();
+        });
     } catch (e) {
       console.error("WebGL context creation failed inside Hyperspeed component:", e);
       setWebglFailed(true);

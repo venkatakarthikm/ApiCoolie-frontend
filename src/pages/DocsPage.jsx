@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { BookOpen, Key, Calendar, Terminal, Shield, ArrowRight, Book, HelpCircle, AlertCircle, Info, Cpu, Database, Network } from 'lucide-react';
+import { BookOpen, Key, Calendar, Terminal, Shield, ArrowRight, Book, HelpCircle, AlertCircle, Info, Cpu, Database, Network, Globe } from 'lucide-react';
 import { CopyButton } from '../components/CopyButton.jsx';
 
 export function DocsPage() {
@@ -75,14 +75,38 @@ def verify_webhook(payload, signature_header, secret_token):
     { id: 'vm', title: 'Isolated-VM V8 Runtime Spec', icon: Terminal },
     { id: 'sec', title: 'Webhook Security & HMAC Signatures', icon: Shield },
     { id: 'api', title: 'Programmatic REST API Keys', icon: Key },
+    { id: 'json', title: 'JSON Formatter & Schema Suite', icon: Globe },
     { id: 'faq', title: 'Developer FAQ & Troubleshooting', icon: HelpCircle },
   ];
+
+  let docTitle = 'Developer Documentation';
+  let docDesc = 'Official documentation for Api Coolie. Learn cron patterns, script integrations, HMAC verification codes, and client scopes.';
+
+  if (activeSection === 'cron') {
+    docTitle = 'Advanced Cron Scheduler Rules';
+    docDesc = 'Learn how to configure 5-field and 6-field cron expressions for sub-minute scheduled triggers down to 1-second ticks.';
+  } else if (activeSection === 'vm') {
+    docTitle = 'Isolated-VM V8 Runtime Specification';
+    docDesc = 'Detailed reference specification for running scheduled JavaScript scripts securely inside isolated V8 isolates.';
+  } else if (activeSection === 'sec') {
+    docTitle = 'Webhook Security & HMAC Verification';
+    docDesc = 'Protect your endpoints from webhook injection attacks using cryptographic SHA-256 HMAC header verification.';
+  } else if (activeSection === 'api') {
+    docTitle = 'Programmatic REST API keys & Scopes';
+    docDesc = 'Manage your cron schedules programmatically using Bearer auth tokens and multi-scoped API commands.';
+  } else if (activeSection === 'json') {
+    docTitle = 'JSON Formatter & Schema Suite';
+    docDesc = 'Format, validate, beautify, and inspect API payloads using the integrated JSON schema utility.';
+  } else if (activeSection === 'faq') {
+    docTitle = 'Developer FAQ & Troubleshooting';
+    docDesc = 'Answers to common scheduled worker issues, memory limit exceptions, and server-side request forgery filtering.';
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 flex flex-col lg:flex-row gap-8 animate-scale text-xs md:text-sm">
       <Helmet>
-        <title>Documentation | Api Coolie</title>
-        <meta name="description" content="Official documentation for Api Coolie. Learn cron patterns, script integrations, HMAC verification codes, and client scopes." />
+        <title>{docTitle} | Api Coolie Docs</title>
+        <meta name="description" content={docDesc} />
       </Helmet>
 
       {/* Docs Side Nav */}
@@ -119,7 +143,7 @@ def verify_webhook(payload, signature_header, secret_token):
         {activeSection === 'started' && (
           <div className="space-y-6">
             <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-sans">Getting Started & Architecture</h1>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
               Api Coolie is a developer-first platform designed to run scheduled API triggers and scripts in isolated environments. By hosting your scheduling logic on our highly available infrastructure, you eliminate the need to maintain fragile linux <code>crontab</code> configuration files, manage server processes, or build custom task queues.
             </p>
             
@@ -147,7 +171,7 @@ def verify_webhook(payload, signature_header, secret_token):
 
             <div className="space-y-4 pt-4">
               <h3 className="font-extrabold text-sm text-foreground">How It Works (Under the Hood)</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
                 Api Coolie uses a distributed scheduler engine synchronized with a Neon Postgres event ledger. When a cron trigger pattern evaluates to true:
               </p>
               <ol className="list-decimal pl-5 text-xs text-muted-foreground space-y-2 leading-relaxed">
@@ -163,7 +187,7 @@ def verify_webhook(payload, signature_header, secret_token):
         {activeSection === 'cron' && (
           <div className="space-y-6">
             <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-sans">Advanced Cron Scheduler Rules</h1>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
               We support standard 5-field UNIX cron formats as well as advanced 6-field cron expressions allowing sub-minute scheduling granularity (down to 1-second precisions).
             </p>
             
@@ -213,7 +237,7 @@ def verify_webhook(payload, signature_header, secret_token):
         {activeSection === 'vm' && (
           <div className="space-y-6">
             <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-sans">Isolated-VM V8 Runtime Specification</h1>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
               For security, isolation, and predictability, all custom Javascript scripts execute inside V8 Isolate sandboxes using <code>isolated-vm</code>. This prevents processes from sharing memory states, tampering with the parent OS filesystem, or initiating resource starvation loops.
             </p>
 
@@ -240,7 +264,7 @@ def verify_webhook(payload, signature_header, secret_token):
 
             <div className="space-y-4 pt-4">
               <h3 className="font-extrabold text-sm text-foreground">Pre-configured Global Objects</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
                 The sandbox context strips standard global Node references (like <code>fs</code>, <code>path</code>, <code>http</code>, or `require` of unsafe modules) and replaces them with audited helpers:
               </p>
               <ul className="space-y-3 text-xs text-muted-foreground pl-5 list-disc leading-relaxed">
@@ -264,10 +288,10 @@ def verify_webhook(payload, signature_header, secret_token):
         {activeSection === 'sec' && (
           <div className="space-y-6">
             <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-sans">Webhook Security & HMAC Signatures</h1>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
               When configuring an API Job, you can enable <strong>Webhook Notifications</strong>. This forces the Api Coolie scheduler to dispatch a POST request containing execution logs, payload results, and status codes to your target backend on completion.
             </p>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
               To guarantee that incoming requests originate exclusively from Api Coolie and have not been altered or spoofed, configure a <strong>Webhook Signature Secret</strong> in settings. We use this secret token to sign every webhook request payload via an HMAC SHA-256 signature, which is sent in the header:
               <br />
               <code className="bg-muted/15 border border-border/40 px-2 py-0.5 rounded text-[11px] text-primary mt-1 inline-block">X-Coolie-Signature: sha256=computed_hash</code>
@@ -300,7 +324,7 @@ def verify_webhook(payload, signature_header, secret_token):
         {activeSection === 'api' && (
           <div className="space-y-6">
             <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-sans">Programmatic REST API Keys</h1>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
               Developers can control their Api Coolie resources programmatically via our JSON REST API. All requests must carry an API Key passed as a bearer token in the headers.
             </p>
 
@@ -331,6 +355,38 @@ def verify_webhook(payload, signature_header, secret_token):
               <h4 className="font-extrabold text-xs text-foreground">Token Security Policies</h4>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
                 When generating a programmatic token inside your account settings, restrict access properties using specific scope assignments. For example, assign read-only scopes (`jobs:read`) to scripts parsing job health statuses, and limit write configurations (`jobs:write`) strictly to trusted CI pipelines.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'json' && (
+          <div className="space-y-6">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-sans">JSON Formatter & Schema Suite</h1>
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+              Managing complex API workflows requires clean payload structuring and schema validation. Api Coolie includes a built-in JSON Formatter and Payload Suite to inspect, format, validate, and compare API payloads before deploying scheduled schedules.
+            </p>
+
+            <div className="space-y-4">
+              <h3 className="font-extrabold text-sm text-foreground">Core Services & Operations</h3>
+              <ul className="space-y-3 text-xs text-muted-foreground pl-5 list-disc leading-relaxed">
+                <li>
+                  <strong>Beautifier and Indenter:</strong> Format minified JSON payloads with custom tab spacings (2 spaces, 4 spaces, or tab indents) for easy debugging.
+                </li>
+                <li>
+                  <strong>Syntax Validator:</strong> Detect missing commas, unbalanced brackets, or string quote errors instantly in the browser.
+                  Our parser outputs explicit line and column coordinates to locate formatting errors.
+                </li>
+                <li>
+                  <strong>Remote API Ingestion:</strong> Ingest test JSON strings directly from public API endpoints to verify payload structures under live configurations.
+                </li>
+              </ul>
+            </div>
+
+            <div className="p-4 bg-muted/5 border border-border/40 rounded-2xl space-y-2">
+              <h4 className="font-extrabold text-xs text-foreground flex items-center gap-1.5"><Globe className="h-4 w-4 text-primary" /> Public Tools Access</h4>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                The JSON Formatter suite is available as a public, unauthenticated utility at <code>/tools/json-formatter</code>. Programmers can test, validate, and beautify their payloads anonymously before registering or configuring active schedules.
               </p>
             </div>
           </div>

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Zap, ArrowRight, Play, Calendar, Code2, Cpu } from 'lucide-react';
+import { Zap, ArrowRight, Play, Calendar, Code2, Cpu, ChevronDown, HelpCircle, Globe } from 'lucide-react';
 import { Button } from '../components/ui/Button.jsx';
 import Hyperspeed from '../components/Hyperspeed.jsx';
 
 export function LandingPage() {
   const [showHyperspeed, setShowHyperspeed] = useState(false);
   const [webglFailed, setWebglFailed] = useState(false);
+  const [expandedFaq, setExpandedFaq] = useState(null);
 
   useEffect(() => {
     const t1 = setTimeout(() => {
@@ -16,11 +17,82 @@ export function LandingPage() {
     return () => clearTimeout(t1);
   }, []);
 
+  const toggleFaq = (index) => {
+    setExpandedFaq(expandedFaq === index ? null : index);
+  };
+
   return (
     <div className="relative min-h-screen bg-background text-foreground overflow-x-hidden w-full">
       <Helmet>
         <title>Api Coolie | Modern Scheduled API Calls & Code Executions</title>
         <meta name="description" content="Api Coolie carries your API payloads and script executors (JS & Python) on precise schedules (cron, intervals, weekly days). Dynamic logs, status badges and AI diagnostics." />
+        <script type="application/ld+json">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              "name": "Api Coolie",
+              "operatingSystem": "All",
+              "applicationCategory": "DeveloperApplication",
+              "offers": {
+                "@type": "Offer",
+                "price": "0.00",
+                "priceCurrency": "USD"
+              },
+              "description": "Serverless scheduled task automation platform running API triggers and custom JavaScript/Python code sandboxes using timezone-aware cron expressions."
+            }
+          `}
+        </script>
+        <script type="application/ld+json">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "How do I schedule an API call online without managing a server?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "You can schedule API calls online without a server by using a serverless API scheduler like Api Coolie. By configuring the request URL, HTTP method, authorization headers, and setting a cron expression, Api Coolie triggers the request automatically."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How do I run a JavaScript or Python script on a schedule online?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "You can run scripts on a schedule online by copying your JavaScript or Python code into Api Coolie's Code Runner, which executes your code inside an isolated V8 sandbox on your set cron interval."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "What is a timezone-aware cron scheduler?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A timezone-aware cron scheduler evaluates execution times based on a specific local timezone rather than server UTC offsets, automatically correcting for Daylight Saving Time (DST) changes."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How do I verify webhook payloads using HMAC signatures?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Api Coolie hashes request payloads using a secret key and SHA-256 HMAC, sending it in the X-Coolie-Signature header. Your backend validates this hash to ensure payload integrity."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Is Api Coolie free to use?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, Api Coolie's Free Plan includes up to 20 active jobs, 1-minute execution cycles, and 20 daily AI diagnostics insights to analyze failed execution logs."
+                  }
+                }
+              ]
+            }
+          `}
+        </script>
       </Helmet>
 
       {/* Hero Header Section with Hyperspeed background (Permanently Dark) */}
@@ -134,7 +206,7 @@ export function LandingPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Feature 1 */}
               <div className="p-6 border border-border/40 rounded-2xl bg-card space-y-4 shadow-sm hover:shadow-md transition-shadow">
                 <div className="p-3 bg-primary/10 rounded-xl w-fit text-primary border border-primary/20">
@@ -167,6 +239,17 @@ export function LandingPage() {
                   API request failed? Click the diagnostics assistant to receive structured code repairs, payload fixes, and details on what headers were rejected.
                 </p>
               </div>
+
+              {/* Feature 4 */}
+              <div className="p-6 border border-border/40 rounded-2xl bg-card space-y-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="p-3 bg-primary/10 rounded-xl w-fit text-primary border border-primary/20">
+                  <Globe className="h-5 w-5" />
+                </div>
+                <h3 className="text-sm font-bold">JSON Payload Suite</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Format, validate, and compare API payloads before deploying scheduled routines. Access tools publicly and anonymously at any time.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -186,6 +269,71 @@ export function LandingPage() {
                 Create Account Free
               </Button>
             </Link>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-20 max-w-4xl mx-auto px-4 w-full border-t border-border/20">
+          <div className="text-center space-y-3 mb-12">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2.5 py-0.5 rounded bg-primary/10 w-fit mx-auto block">FAQ</span>
+            <h2 className="text-3xl font-extrabold tracking-tight">Frequently Asked Questions</h2>
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-xl mx-auto">
+              Everything you need to know about scheduling API calls, running sandboxed scripts, and status monitors.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                q: "How do I schedule an API call online without managing a server?",
+                a: "You can schedule API calls online without a server by using a serverless API scheduler like Api Coolie. By configuring the request URL, HTTP method (GET, POST, etc.), authorization headers, and setting a cron expression or custom interval, Api Coolie triggers the request automatically from a high-availability queue."
+              },
+              {
+                q: "How do I run a JavaScript or Python script on a schedule online?",
+                a: "You can run scripts on a schedule online by copying your JavaScript or Python code into Api Coolie's Code Runner. The engine provisions a secure, isolated V8 sandbox container to execute your code on your set cron interval, with support for encrypted environment variables."
+              },
+              {
+                q: "What is a timezone-aware cron scheduler?",
+                a: "A timezone-aware cron scheduler evaluates execution times based on a specific local timezone (e.g., Asia/Kolkata or America/New_York) rather than server UTC offsets. This protects tasks from being executed twice or skipped during Daylight Savings Time (DST) changes."
+              },
+              {
+                q: "How do I verify webhook payloads using HMAC signatures?",
+                a: "Api Coolie hashes request payloads using a secret key and SHA-256 HMAC, sending it in the X-Coolie-Signature header. Your backend validates this hash to ensure payload integrity and verify that triggers originate from our servers."
+              },
+              {
+                q: "Is Api Coolie free to use?",
+                a: "Yes, Api Coolie is free to start. The Free Plan includes up to 20 active jobs, 1-minute minimum execution cycles, and 20 daily AI diagnostic insights to analyze failed execution logs."
+              }
+            ].map((item, idx) => {
+              const isOpen = expandedFaq === idx;
+              return (
+                <div 
+                  key={idx} 
+                  className="border border-border/40 rounded-2xl bg-card overflow-hidden transition-all duration-300"
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleFaq(idx)}
+                    className="w-full flex items-center justify-between p-5 text-left font-extrabold text-foreground hover:text-primary transition-colors text-xs sm:text-sm"
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <HelpCircle className="h-4 w-4 text-primary shrink-0" />
+                      {item.q}
+                    </span>
+                    <ChevronDown className={`h-4.5 w-4.5 text-muted-foreground transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
+                  </button>
+                  <div 
+                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                      isOpen ? 'max-h-60 border-t border-border/20 p-5' : 'max-h-0'
+                    }`}
+                  >
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {item.a}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       </div>

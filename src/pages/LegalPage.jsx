@@ -1,168 +1,289 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { FileText, Scale, Shield, Lock, Server, Globe, Key, AlertCircle, Info, Database, Send, Clock } from 'lucide-react';
+import { privacyPolicyText, termsOfServiceText, securityOperationsText } from '../utils/legalText.js';
+import { CopyButton } from '../components/CopyButton.jsx';
+
+function renderLegalContent(content) {
+  const blocks = content.split('\n\n');
+  return blocks.map((block, idx) => {
+    block = block.trim();
+    if (!block) return null;
+
+    // Generic Headers Parser (# to ######)
+    const headerMatch = block.match(/^(#{1,6})\s+(.*)$/s);
+    if (headerMatch) {
+      const level = headerMatch[1].length;
+      const text = headerMatch[2].trim();
+      const Tag = `h${level}`;
+      let className = "text-foreground font-bold font-sans mt-5 mb-2";
+      if (level === 1) className = "text-2xl font-extrabold text-foreground pt-4 pb-2 mt-6";
+      else if (level === 2) className = "text-xl font-extrabold text-foreground pt-3 pb-2 mt-5";
+      else if (level === 3) className = "text-lg font-bold text-foreground pt-2 pb-1 mt-4";
+      else if (level === 4) className = "text-base font-bold text-foreground pt-1.5 pb-1 mt-3";
+      else className = "text-sm font-bold text-foreground mt-2";
+      
+      const renderedText = text.split('**').map((part, pIdx) => {
+        if (pIdx % 2 === 1) {
+          return <strong key={pIdx} className="text-foreground font-bold">{part}</strong>;
+        }
+        return part.split('`').map((subPart, sIdx) => {
+          if (sIdx % 2 === 1) {
+            return <code key={sIdx} className="bg-muted/15 border border-border/40 px-1 py-0.5 rounded text-[10px] text-primary">{subPart}</code>;
+          }
+          return subPart;
+        });
+      });
+
+      return (
+        <Tag key={idx} className={className}>
+          {renderedText}
+        </Tag>
+      );
+    }
+
+    // Horizontal Rule
+    if (block === '---') {
+      return <hr key={idx} className="my-6 border-border/40" />;
+    }
+
+    // Code block
+    if (block.startsWith('```')) {
+      const lines = block.split('\n');
+      const language = lines[0].replace('```', '').trim();
+      const code = lines.slice(1, -1).join('\n');
+      return (
+        <div key={idx} className="relative border border-border/40 rounded-2xl bg-card overflow-hidden my-4">
+          <div className="absolute right-3 top-3 z-10">
+            <CopyButton value={code} label="Copy Code" />
+          </div>
+          <pre className="p-4 text-xs overflow-x-auto bg-muted/5 font-mono leading-relaxed text-muted-foreground max-h-96">
+            <code>{code}</code>
+          </pre>
+        </div>
+      );
+    }
+
+    // Table block
+    if (block.startsWith('|')) {
+      const rows = block.split('\n');
+      const tableRows = rows.filter(r => r.trim() && !r.includes('---|'));
+      if (tableRows.length > 0) {
+        return (
+          <div key={idx} className="border border-border/40 rounded-2xl overflow-hidden bg-muted/5 my-4">
+            <table className="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr className="bg-muted/20 border-b border-border/40 font-bold">
+                  {tableRows[0].split('|').slice(1, -1).map((cell, cIdx) => (
+                    <th key={cIdx} className="p-3">{cell.trim()}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/20 text-muted-foreground font-medium">
+                {tableRows.slice(1).map((row, rIdx) => (
+                  <tr key={rIdx}>
+                    {row.split('|').slice(1, -1).map((cell, cIdx) => (
+                      <td key={cIdx} className="p-3">{cell.trim()}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      }
+    }
+
+    // Bullet List block
+    if (block.startsWith('* ') || block.startsWith('- ')) {
+      const items = block.split('\n');
+      return (
+        <ul key={idx} className="list-disc pl-5 space-y-2 text-xs sm:text-sm text-muted-foreground my-4">
+          {items.map((item, iIdx) => {
+            const cleanItem = item.replace(/^[*-\s]+/, '');
+            // handle inline bold inside list item
+            const renderedItem = cleanItem.split('**').map((part, pIdx) => {
+              if (pIdx % 2 === 1) {
+                return <strong key={pIdx} className="text-foreground font-bold">{part}</strong>;
+              }
+              return part;
+            });
+            return <li key={iIdx}>{renderedItem}</li>;
+          })}
+        </ul>
+      );
+    }
+
+    // Numbered List block
+    if (/^\d+\.\s/.test(block)) {
+      const items = block.split('\n');
+      return (
+        <ol key={idx} className="list-decimal pl-5 space-y-2 text-xs sm:text-sm text-muted-foreground my-4">
+          {items.map((item, iIdx) => {
+            const cleanItem = item.replace(/^\d+\.\s+/, '');
+            // handle inline bold inside list item
+            const renderedItem = cleanItem.split('**').map((part, pIdx) => {
+              if (pIdx % 2 === 1) {
+                return <strong key={pIdx} className="text-foreground font-bold">{part}</strong>;
+              }
+              return part;
+            });
+            return <li key={iIdx}>{renderedItem}</li>;
+          })}
+        </ol>
+      );
+    }
+
+    // Default Paragraph with bold replacements
+    // Simple inline parser for **bold** text
+    const renderedText = block.split('**').map((part, pIdx) => {
+      if (pIdx % 2 === 1) {
+        return <strong key={pIdx} className="text-foreground font-bold">{part}</strong>;
+      }
+      // handle inline code: `code`
+      return part.split('`').map((subPart, sIdx) => {
+        if (sIdx % 2 === 1) {
+          return <code key={sIdx} className="bg-muted/15 border border-border/40 px-1.5 py-0.5 rounded text-[11px] text-primary">{subPart}</code>;
+        }
+        return subPart;
+      });
+    });
+
+    return (
+      <p key={idx} className="text-sm md:text-base text-muted-foreground leading-relaxed font-medium my-4">
+        {renderedText}
+      </p>
+    );
+  });
+}
 
 export function LegalPage() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  
+  // Set tab based on path
+  const getTabFromPath = (path) => {
+    if (path.includes('terms')) return 'terms';
+    if (path.includes('security')) return 'security';
+    return 'privacy';
+  };
+
+  const [activeTab, setActiveTab] = useState(getTabFromPath(pathname));
+
+  useEffect(() => {
+    setActiveTab(getTabFromPath(pathname));
+  }, [pathname]);
+
+  const handleTabChange = (tabId) => {
+    navigate(`/legal/${tabId}`);
+  };
+
+  const tabs = [
+    { id: 'privacy', label: 'Privacy Policy', icon: FileText, desc: 'How we collect, encrypt, and manage user parameters.' },
+    { id: 'terms', label: 'Terms of Service', icon: Scale, desc: 'Rules, service limits, and runtime constraints.' },
+    { id: 'security', label: 'Security Operations', icon: Shield, desc: 'Database isolation and secrets protection.' }
+  ];
 
   let title = 'Privacy Policy';
   let desc = 'How we collect, encrypt, and manage user parameters.';
-  let content = (
-    <div className="space-y-6 text-xs sm:text-sm">
-      <section className="space-y-3">
-        <h3 className="text-base font-extrabold text-foreground">1. Information We Collect</h3>
-        <p>We collect information you provide directly to us when creating an account, configuring jobs, or communicating with support. This includes:</p>
-        <ul className="list-disc pl-5 space-y-2">
-          <li><strong>Account Data:</strong> Primary email addresses, usernames, billing parameters, profile photos, and OAuth identification credentials passed during registration.</li>
-          <li><strong>Job Configurations:</strong> Target HTTP API urls, custom request headers, raw JSON bodies, and code runner files (JavaScript/Python) scheduled for interval loops.</li>
-          <li><strong>Environmental Parameters:</strong> Private API tokens, webhook tokens, and server passwords configured inside the job dashboard. These values are encrypted immediately and never displayed or sent in plaintext.</li>
-          <li><strong>Execution Metrics:</strong> Run logs, response status codes, execution latencies, CPU time consumption, and stdout/stderr print records.</li>
-        </ul>
-      </section>
 
-      <section className="space-y-3">
-        <h3 className="text-base font-extrabold text-foreground">2. How We Use Information</h3>
-        <p>The collected data is processed strictly to deliver task scheduling services. Specific use cases include:</p>
-        <ul className="list-disc pl-5 space-y-2">
-          <li>Managing account status, executing billing adjustments, and validating API call quotas.</li>
-          <li>Provisioning secure V8 Isolate sandboxes to compile and execute scheduled code routines.</li>
-          <li>Generating dynamic execution logs and rendering public SVG status badges.</li>
-          <li>Analyzing job failure logs via LLM adapters to display AI-assisted bug recommendations on your dashboard.</li>
-        </ul>
-      </section>
-
-      <section className="space-y-3">
-        <h3 className="text-base font-extrabold text-foreground">3. CCPA and GDPR Compliance Rights</h3>
-        <p>In accordance with global privacy frameworks, Api Coolie guarantees the following self-service control operations for all users:</p>
-        <ul className="list-disc pl-5 space-y-2">
-          <li><strong>Right to Access:</strong> You can download or view all database records associated with your account, including complete job lists, API tokens, and execution histories.</li>
-          <li><strong>Right to Rectification:</strong> You can update profile values, edit job configurations, and reset environmental parameters at any time from the account workspace.</li>
-          <li><strong>Right to Erasure ("Right to be Forgotten"):</strong> Deleting your account permanently purges all tables, active cron runners, database schedules, and encrypted environmental secrets. Purges are completed immediately and are non-reversible.</li>
-        </ul>
-      </section>
-
-      <section className="space-y-3">
-        <h3 className="text-base font-extrabold text-foreground">4. Third-Party Subprocessors</h3>
-        <p>We work with trusted infrastructure providers to run our platform. These third parties include:</p>
-        <table className="w-full text-xs text-left border border-border/40 rounded-xl overflow-hidden mt-3">
-          <thead>
-            <tr className="bg-muted/20 border-b border-border/40 font-bold">
-              <th className="p-3">Partner Entity</th>
-              <th className="p-3">Purpose</th>
-              <th className="p-3">Data Exchanged</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/20 text-muted-foreground font-medium">
-            <tr>
-              <td className="p-3 font-semibold text-foreground">Neon Database Inc.</td>
-              <td className="p-3">Primary postgres storage.</td>
-              <td className="p-3">All user records, encrypted secrets, and execution history.</td>
-            </tr>
-            <tr>
-              <td className="p-3 font-semibold text-foreground">OpenRouter API</td>
-              <td className="p-3">Generates AI diagnostics for error logs.</td>
-              <td className="p-3">Anonymized script stdout/stderr error logs (no environment variables are shared).</td>
-            </tr>
-            <tr>
-              <td className="p-3 font-semibold text-foreground">Google Cloud Platform</td>
-              <td className="p-3">OAuth 2.0 Identity verification.</td>
-              <td className="p-3">Email validation, name, and profile photos.</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-    </div>
-  );
-
-  if (pathname.includes('terms')) {
+  if (activeTab === 'terms') {
     title = 'Terms of Service';
     desc = 'Rules and limitations for using the Api Coolie scheduler service.';
-    content = (
-      <div className="space-y-6 text-xs sm:text-sm">
-        <section className="space-y-3">
-          <h3 className="text-base font-extrabold text-foreground">1. Description of Service</h3>
-          <p>Api Coolie provides scheduled task execution resources. This includes configuring REST API calls and compiling custom scripts (JavaScript/Python) inside isolated sandboxes. Services are provided "as-is" and "as-available". While we aim for 99.9% uptime, we do not guarantee uninterrupted operation or zero-latency trigger cycles.</p>
-        </section>
-
-        <section className="space-y-3">
-          <h3 className="text-base font-extrabold text-foreground">2. Acceptable Use Policy (AUP)</h3>
-          <p>By registering on Api Coolie, you agree to configure jobs strictly for legitimate integrations. The following use cases are strictly prohibited and will result in immediate account termination:</p>
-          <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Security Vulnerability Attacks:</strong> Configuring endpoint loops pointing to internal networks, loopback IP subnets, or metadata ports (Server-Side Request Forgery - SSRF).</li>
-            <li><strong>Denial of Service (DoS):</strong> Setting high-frequency scheduling patterns designed to flood third-party servers, bypass rate-limits, or cause service outages.</li>
-            <li><strong>Resource Exploits:</strong> Attempting to run cryptocurrency miners, CPU stress-testing loops, file system scans, or port scanners within V8 script sandboxes.</li>
-            <li><strong>Spam and Phishing:</strong> Using cron webhooks to distribute automated spam, generate phishing pages, or scrap copyrighted intellectual properties without consent.</li>
-          </ul>
-        </section>
-
-        <section className="space-y-3">
-          <h3 className="text-base font-extrabold text-foreground">3. Isolate Runtime Restrictions</h3>
-          <p>To ensure system stability, task execution is subject to strict resource caps:</p>
-          <ul className="list-disc pl-5 space-y-2">
-            <li><strong>Memory Limits:</strong> Sandboxed runs are capped at 128MB of Heap RAM. Tasks exceeding this limit are terminated immediately with a memory allocation failure.</li>
-            <li><strong>CPU Execution Limits:</strong> Total script runtime is capped at 5 seconds. Script tasks that fail to complete within this window are killed automatically.</li>
-            <li><strong>Free Tier Boundaries:</strong> Free tier accounts are limited to a minimum scheduler cycle of 1 minute. Precise 1-second interval execution requires an upgrade to a paid subscription plan.</li>
-          </ul>
-        </section>
-
-        <section className="space-y-3">
-          <h3 className="text-base font-extrabold text-foreground">4. Limitation of Liability and Indemnification</h3>
-          <p>Api Coolie is not liable for any financial losses, data corruption, or service interruptions caused by scheduled job execution failures. You agree to indemnify, defend, and hold harmless Api Coolie and its operators from any claims, damages, liabilities, or expenses arising from your usage of our task runner tools.</p>
-        </section>
-      </div>
-    );
-  } else if (pathname.includes('security')) {
+  } else if (activeTab === 'security') {
     title = 'Security Operations';
     desc = 'Measures enforcing authorization isolation and credential protection.';
-    content = (
-      <div className="space-y-6 text-xs sm:text-sm">
-        <section className="space-y-3">
-          <h3 className="text-base font-extrabold text-foreground">1. Multi-Tenant Database Isolation</h3>
-          <p>Api Coolie stores user metadata and job configurations inside a shared Neon Postgres database. To ensure strict multi-tenant isolation, the application enforces the following controls:</p>
-          <ul className="list-disc pl-5 space-y-2">
-            <li><strong>UUID-Scoped Queries:</strong> Database records do not use sequential integer keys. All records are indexed using cryptographically random UUIDs.</li>
-            <li><strong>Application-Layer Scope Checks:</strong> The backend Express service validates user ownership parameters on every query. Every write, read, and delete operation is scoped strictly using authenticated session tokens to prevent unauthorized database cross-reads.</li>
-          </ul>
-        </section>
-
-        <section className="space-y-3">
-          <h3 className="text-base font-extrabold text-foreground">2. Encryption at Rest and in Transit</h3>
-          <p>Protecting user data is a top priority. We implement encryption throughout the application lifecycles:</p>
-          <ul className="list-disc pl-5 space-y-2">
-            <li><strong>In Transit:</strong> All connections to our API endpoints, dashboard, and webhook targets are encrypted using TLS 1.3. Unencrypted HTTP requests are automatically upgraded.</li>
-            <li><strong>Secrets at Rest:</strong> Sensitive environmental variables (database connection strings, API tokens, passwords) are encrypted before storage. We use AES-256-GCM encryption with keys kept separate from database storage.</li>
-            <li><strong>Redacted Log Output:</strong> The scheduler engine scans execution log streams for matching values of encrypted variables. Any matches are redacted and replaced with a secure placeholder before logs are committed to database storage.</li>
-          </ul>
-        </section>
-
-        <section className="space-y-3">
-          <h3 className="text-base font-extrabold text-foreground">3. Webhook Authentication and HMAC Signatures</h3>
-          <p>Incoming webhook calls are verified using cryptographically signed headers. When a job completes, the scheduler signs the JSON request payload using your account's Webhook Signature Secret and sends it in the header:</p>
-          <code className="bg-muted/15 border border-border/40 px-3 py-1 rounded text-[11px] text-primary block w-fit font-mono">X-Coolie-Signature: sha256=computed_hash_value</code>
-          <p>Your backend can use this header to verify that the request came from Api Coolie and has not been modified. This prevents unauthorized callers from sending fake logs or spoofing trigger events.</p>
-        </section>
-
-        <section className="space-y-3">
-          <h3 className="text-base font-extrabold text-foreground">4. Vulnerability Disclosure Policy</h3>
-          <p>We welcome security reports from developers and security researchers. If you discover a security issue or vulnerability on Api Coolie, please contact us at <a href="mailto:security@apicoolie.com" className="text-primary font-semibold hover:underline">security@apicoolie.com</a> before public disclosure. We will review your report and work to address it promptly.</p>
-        </section>
-      </div>
-    );
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-16 sm:py-24 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 py-12 flex flex-col lg:flex-row gap-8 animate-scale text-xs md:text-sm">
       <Helmet>
         <title>{title} | Api Coolie</title>
+        <meta name="description" content={desc} />
       </Helmet>
 
-      <div className="space-y-2 border-b border-border/40 pb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">{title}</h1>
-        <p className="text-sm text-muted-foreground">{desc}</p>
-      </div>
+      {/* Sidebar Navigation */}
+      <aside className="w-full lg:w-72 shrink-0 space-y-4">
+        <div className="px-3 py-1 flex items-center gap-2">
+          <Shield className="h-5 w-5 text-primary" />
+          <span className="text-xs font-bold text-foreground uppercase tracking-wider">Legal Center</span>
+        </div>
+        <nav className="flex flex-col gap-2">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                id={`legal-tab-btn-${tab.id}`}
+                onClick={() => handleTabChange(tab.id)}
+                className={`w-full text-left p-4 rounded-2xl border transition-all text-xs font-medium ${
+                  activeTab === tab.id
+                    ? 'bg-primary/5 text-primary border-primary shadow-sm'
+                    : 'bg-card text-muted-foreground border-border/40 hover:text-foreground hover:bg-muted/10'
+                }`}
+              >
+                <div className="flex items-center gap-2.5 mb-1.5">
+                  <Icon className={`h-4.5 w-4.5 ${activeTab === tab.id ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <span className="font-extrabold text-foreground">{tab.label}</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground leading-normal font-medium">{tab.desc}</p>
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
 
-      <div className="text-muted-foreground leading-relaxed">
-        {content}
+      {/* Main Content Area */}
+      <div className="flex-1 max-w-4xl border border-border/40 bg-card rounded-3xl p-6 md:p-10 shadow-sm space-y-8">
+        
+        {activeTab === 'privacy' && (
+          <div className="space-y-6">
+            <div className="space-y-2 border-b border-border/40 pb-5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2.5 py-0.5 rounded bg-primary/10 w-fit">Privacy Policy</span>
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-sans pt-1">Privacy Policy</h1>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                Api Coolie values developer trust. We prioritize high-grade encryption and secure access validation over data collection.
+              </p>
+            </div>
+
+            <div className="max-w-none border-t border-border/40 pt-6 space-y-4">
+              {renderLegalContent(privacyPolicyText)}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'terms' && (
+          <div className="space-y-6">
+            <div className="space-y-2 border-b border-border/40 pb-5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2.5 py-0.5 rounded bg-primary/10 w-fit">Terms of Service</span>
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-sans pt-1">Terms of Service</h1>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                Rules, acceptable usage boundaries, and service limitations for managing scheduled jobs on Api Coolie.
+              </p>
+            </div>
+
+            <div className="max-w-none border-t border-border/40 pt-6 space-y-4">
+              {renderLegalContent(termsOfServiceText)}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'security' && (
+          <div className="space-y-6">
+            <div className="space-y-2 border-b border-border/40 pb-5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2.5 py-0.5 rounded bg-primary/10 w-fit">Security Framework</span>
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground font-sans pt-1">Security Operations</h1>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                How we protect developer credentials, isolate databases, and ensure cryptographic verification of incoming triggers.
+              </p>
+            </div>
+
+            <div className="max-w-none border-t border-border/40 pt-6 space-y-4">
+              {renderLegalContent(securityOperationsText)}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

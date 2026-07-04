@@ -5,9 +5,22 @@ import { Tag, Calendar, Sparkles } from 'lucide-react';
 export function ChangelogPage() {
   const versions = [
     {
-      version: 'v1.2.0',
+      version: 'v1.3.0',
       date: 'July 04, 2026',
       badge: 'Latest',
+      changes: [
+        { type: 'added', text: 'Integrated interactive Accordion FAQ section with FAQPage and SoftwareApplication JSON-LD schema.' },
+        { type: 'added', text: 'Public Versus Comparison page at /versus comparing platform with traditional webhook crons and uptime systems.' },
+        { type: 'added', text: 'JSON Formatter references, templates, and sandbox validation tutorials across all public and developer guides.' },
+        { type: 'added', text: 'Dynamic Helmet title and meta-description updates across Blog, Docs, and Tutorials pages for search crawling indexing.' },
+        { type: 'changed', text: 'Redesigned Legal policies pages (Privacy, Terms, Security) to render dynamically using custom JSX markdown parser.' },
+        { type: 'changed', text: 'Upgraded body paragraph font sizes across all marketing pages to improve readability.' },
+        { type: 'fixed', text: 'Resolved WebGL context failure crashing issues inside Hyperspeed.jsx component and fixed Lucide-react import error.' }
+      ],
+    },
+    {
+      version: 'v1.2.0',
+      date: 'July 04, 2026',
       changes: [
         { type: 'added', text: 'Integrated Google OAuth 2.0 Implicit Flow client-side token acquisition.' },
         { type: 'added', text: 'New Tutorials library page containing detailed developer guides and code configurations.' },
@@ -50,7 +63,7 @@ export function ChangelogPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-16 sm:py-24 space-y-12 animate-scale text-xs">
+    <div className="max-w-3xl mx-auto px-4 py-16 sm:py-24 space-y-12 animate-scale text-sm md:text-base">
       <Helmet>
         <title>Changelog | Api Coolie</title>
         <meta name="description" content="Official release log and version changes overview for Api Coolie platform." />
