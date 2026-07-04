@@ -20,7 +20,8 @@ import {
   Loader2,
   RefreshCw,
   Globe,
-  Info
+  Info,
+  Terminal
 } from 'lucide-react';
 import { apiClient } from '../utils/apiClient.js';
 import { Button } from '../components/ui/Button.jsx';
@@ -31,6 +32,7 @@ import { ScheduleBuilder } from '../components/ScheduleBuilder.jsx';
 import { CodeRunnerPanel } from '../components/CodeRunnerPanel.jsx';
 import { BadgeGenerator } from '../components/BadgeGenerator.jsx';
 import { WorkerUrlPanel } from '../components/WorkerUrlPanel.jsx';
+import { RunOutputPanel } from '../components/RunOutputPanel.jsx';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 
 export function JobDetailsPage() {
@@ -135,6 +137,28 @@ export function JobDetailsPage() {
   const [apiAuthType, setApiAuthType] = useState('none');
   const [apiAuthConfig, setApiAuthConfig] = useState({});
 
+  // API Test execution runner
+  const [apiIsRunning, setApiIsRunning] = useState(false);
+  const [apiTestExecutionId, setApiTestExecutionId] = useState(null);
+
+  const handleTestRunApi = async () => {
+    if (!id) {
+      showToast('Please save the job configuration first to execute a test run.', 'error');
+      return;
+    }
+    setApiIsRunning(true);
+    setApiTestExecutionId(null);
+    try {
+      const result = await apiClient.post(`/jobs/${id}/test-run`, {});
+      setApiTestExecutionId(result.id);
+      showToast('API execution test finished!', 'success');
+    } catch (error) {
+      showToast(`API execution trigger failed: ${error.message}`, 'error');
+    } finally {
+      setApiIsRunning(false);
+    }
+  };
+
   // Parse URL query parameters to state
   const syncUrlToQueryParams = (url) => {
     try {
@@ -191,12 +215,22 @@ export function JobDetailsPage() {
   // Schedule Config
   const [scheduleConfig, setScheduleConfig] = useState({});
 
+  // Response Filter/Redaction states
+  const [blockedKeys, setBlockedKeys] = useState([]);
+  const [blockedText, setBlockedText] = useState([]);
+  const [newBlockedKey, setNewBlockedKey] = useState('');
+  const [newBlockedText, setNewBlockedText] = useState('');
+
   // Sync state values on load
   useEffect(() => {
     if (job) {
       setName(job.name || '');
       setDescription(job.description || '');
       setStatus(job.status || 'active');
+
+      const filter = job.responseFilter || {};
+      setBlockedKeys(filter.blockedKeys || []);
+      setBlockedText(filter.blockedText || []);
 
       const delivery = job.responseDelivery || {};
       setWebhookUrl(delivery.webhook_url || '');
@@ -287,6 +321,10 @@ export function JobDetailsPage() {
           token: webhookSecurityToken,
         },
       },
+      responseFilter: {
+        blockedKeys,
+        blockedText,
+      },
       ...scheduleConfig,
     };
 
@@ -310,6 +348,64 @@ export function JobDetailsPage() {
     }
 
     updateMutation.mutate(body);
+  };
+
+  const getDetectedKeys = () => {
+    let responseText = '';
+    
+    // Find the latest successful execution logs
+    const latestSuccess = executions?.find(ex => ex.status === 'success' && ex.responseBody);
+    if (latestSuccess) {
+      responseText = latestSuccess.responseBody;
+    }
+
+    if (!responseText) return [];
+
+    try {
+      const parsed = JSON.parse(responseText);
+      const keysSet = new Set();
+      
+      const extractKeys = (obj) => {
+        if (obj === null || obj === undefined) return;
+        if (Array.isArray(obj)) {
+          obj.forEach(item => extractKeys(item));
+        } else if (typeof obj === 'object') {
+          Object.entries(obj).forEach(([k, v]) => {
+            keysSet.add(k);
+            extractKeys(v);
+          });
+        }
+      };
+
+      extractKeys(parsed);
+      return Array.from(keysSet);
+    } catch (_) {
+      return [];
+    }
+  };
+
+  const handleToggleKey = (key) => {
+    if (blockedKeys.includes(key)) {
+      setBlockedKeys(blockedKeys.filter(k => k !== key));
+    } else {
+      setBlockedKeys([...blockedKeys, key]);
+    }
+  };
+
+  const handleAddBlockedKey = (e) => {
+    e.preventDefault();
+    if (newBlockedKey.trim() && !blockedKeys.includes(newBlockedKey.trim())) {
+      setBlockedKeys([...blockedKeys, newBlockedKey.trim()]);
+      setNewBlockedKey('');
+    }
+  };
+
+  const handleAddBlockedText = (e) => {
+    e.preventDefault();
+    if (newBlockedText.trim() && !blockedText.includes(newBlockedText.trim())) {
+      setBlockedText([...blockedText, newBlockedText.trim()]);
+      setNewBlockedText('');
+    }
   };
 
   const handleSendTestWebhook = async () => {
@@ -558,6 +654,14 @@ export function JobDetailsPage() {
                     className="flex-grow px-3 py-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:border-primary font-mono"
                     placeholder="https://api.example.com/v1/endpoint"
                   />
+                  <Button
+                    type="button"
+                    onClick={handleTestRunApi}
+                    loading={apiIsRunning}
+                    className="px-4 py-2 text-xs font-bold bg-green-600 hover:bg-green-700 text-white shrink-0 flex items-center gap-1.5"
+                  >
+                    <Play className="h-3.5 w-3.5 fill-current" /> Run API
+                  </Button>
                 </div>
 
                 {/* Postman-style sub-tabs */}
@@ -855,6 +959,28 @@ export function JobDetailsPage() {
                     </div>
                   )}
                 </div>
+
+                {/* API Output Console */}
+                <div className="pt-4 border-t border-border/30 mt-4">
+                  {apiTestExecutionId ? (
+                    <RunOutputPanel
+                      executionId={apiTestExecutionId}
+                      onClose={() => setApiTestExecutionId(null)}
+                    />
+                  ) : (
+                    <div className="border border-dashed border-border rounded-2xl flex flex-col items-center justify-center p-6 text-center bg-muted/5 min-h-[120px] text-muted-foreground space-y-2">
+                      <Terminal className="h-8 w-8 text-muted-foreground/60" />
+                      <div className="space-y-1 max-w-xs">
+                        <h4 className="text-xs font-bold text-foreground">API Output Console</h4>
+                        <p className="text-[11px] leading-relaxed">
+                          Click <strong>"Run API"</strong> to test this endpoint instantly.
+                          The execution status, HTTP headers, and response body will appear here.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
               </div>
             )}
 
@@ -921,6 +1047,135 @@ export function JobDetailsPage() {
                     </Button>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Response Data Redaction & Privacy Filters panel */}
+            <div className="border border-border/40 bg-card p-6 rounded-2xl shadow-sm space-y-4">
+              <div>
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Response Redaction & Privacy Filters</h3>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Omit sensitive keys or replace specific text values from all final logs, webhooks, and worker responses.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                {/* Blocked Keys Section */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <ShieldCheck className="h-4 w-4 text-primary" />
+                    <span>Redacted JSON Keys</span>
+                  </h4>
+
+                  {/* Manual Key Input */}
+                  <form onSubmit={handleAddBlockedKey} className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Add key name to block (e.g. password)"
+                      value={newBlockedKey}
+                      onChange={(e) => setNewBlockedKey(e.target.value)}
+                      className="flex-1 px-3 py-1.5 border border-border rounded-lg text-xs bg-background focus:outline-none focus:border-primary font-mono"
+                    />
+                    <Button type="submit" variant="outline" className="py-1 text-[10px] px-3 shrink-0">
+                      Add Key
+                    </Button>
+                  </form>
+
+                  {/* Blocked keys badges */}
+                  <div className="flex flex-wrap gap-1.5 min-h-[30px] p-2 bg-muted/5 border border-border/40 rounded-xl">
+                    {blockedKeys.length === 0 ? (
+                      <span className="text-[10px] text-muted-foreground italic">No keys blocked.</span>
+                    ) : (
+                      blockedKeys.map(k => (
+                        <span key={k} className="inline-flex items-center gap-1 bg-red-500/10 text-red-500 border border-red-500/15 px-2 py-0.5 rounded-full text-[10px] font-mono">
+                          {k}
+                          <button
+                            type="button"
+                            onClick={() => setBlockedKeys(blockedKeys.filter(item => item !== k))}
+                            className="hover:text-red-600 font-bold ml-0.5"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Detected keys from last execution */}
+                  {(() => {
+                    const detected = getDetectedKeys();
+                    if (detected.length === 0) return null;
+                    return (
+                      <div className="space-y-1.5 pt-1">
+                        <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Detected Keys in Latest Output:</span>
+                        <p className="text-[10px] text-muted-foreground">Untick any key to block it from execution responses.</p>
+                        <div className="flex flex-wrap gap-3 p-3 bg-muted/10 border border-border/40 rounded-xl max-h-32 overflow-y-auto">
+                          {detected.map(k => {
+                            const isBlocked = blockedKeys.includes(k);
+                            return (
+                              <label key={k} className="flex items-center gap-2 text-xs font-mono select-none cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={!isBlocked}
+                                  onChange={() => handleToggleKey(k)}
+                                  className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-primary"
+                                />
+                                <span className={isBlocked ? 'line-through text-muted-foreground/60' : 'text-foreground'}>
+                                  {k}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Blocked Text Phrases Section */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                    <AlertCircle className="h-4 w-4 text-yellow-500" />
+                    <span>Redacted Text & Values</span>
+                  </h4>
+
+                  {/* Manual Phrase Input */}
+                  <form onSubmit={handleAddBlockedText} className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Add sensitive text/token to mask"
+                      value={newBlockedText}
+                      onChange={(e) => setNewBlockedText(e.target.value)}
+                      className="flex-1 px-3 py-1.5 border border-border rounded-lg text-xs bg-background focus:outline-none focus:border-primary font-mono"
+                    />
+                    <Button type="submit" variant="outline" className="py-1 text-[10px] px-3 shrink-0">
+                      Add Text
+                    </Button>
+                  </form>
+
+                  {/* Blocked text badges */}
+                  <div className="flex flex-wrap gap-1.5 min-h-[30px] p-2 bg-muted/5 border border-border/40 rounded-xl">
+                    {blockedText.length === 0 ? (
+                      <span className="text-[10px] text-muted-foreground italic">No values/text masked.</span>
+                    ) : (
+                      blockedText.map(t => (
+                        <span key={t} className="inline-flex items-center gap-1 bg-yellow-500/10 text-yellow-500 border border-yellow-500/15 px-2 py-0.5 rounded-full text-[10px] font-mono">
+                          {t.length > 20 ? t.substring(0, 20) + '...' : t}
+                          <button
+                            type="button"
+                            onClick={() => setBlockedText(blockedText.filter(item => item !== t))}
+                            className="hover:text-yellow-600 font-bold ml-0.5"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))
+                    )}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground italic">
+                    Note: Any matching substring above will be replaced with <code className="font-mono text-red-500">[REDACTED]</code> dynamically inside the output body.
+                  </p>
+                </div>
               </div>
             </div>
 

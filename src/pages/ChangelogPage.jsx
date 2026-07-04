@@ -5,9 +5,20 @@ import { Tag, Calendar, Sparkles } from 'lucide-react';
 export function ChangelogPage() {
   const versions = [
     {
+      version: 'v1.4.0',
+      date: 'July 05, 2026',
+      badge: 'Latest',
+      changes: [
+        { type: 'added', text: 'Interactive Response Redaction & Privacy Filters panel to mask sensitive keys or text values recursively.' },
+        { type: 'added', text: 'Synchronous API test run execution and structured output console at the bottom of API job configurations.' },
+        { type: 'added', text: 'Worker URL support for API jobs, enabling direct payload and header triggers.' },
+        { type: 'changed', text: 'Configured white-space pre-wrap styling on response log pre containers to render multiline JSON structures nicely.' },
+        { type: 'fixed', text: 'Resolved Worker URL response format issues, returning properly structured application/json data headers.' }
+      ],
+    },
+    {
       version: 'v1.3.0',
       date: 'July 04, 2026',
-      badge: 'Latest',
       changes: [
         { type: 'added', text: 'Integrated interactive Accordion FAQ section with FAQPage and SoftwareApplication JSON-LD schema.' },
         { type: 'added', text: 'Public Versus Comparison page at /versus comparing platform with traditional webhook crons and uptime systems.' },

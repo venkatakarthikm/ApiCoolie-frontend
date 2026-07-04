@@ -127,21 +127,9 @@ export function WorkerUrlPanel({ job }) {
             <p className="text-xs text-muted-foreground">Configure your serverless HTTP endpoint path triggers.</p>
           </div>
         </div>
-        {job.jobType !== 'code' && (
-          <div className="flex items-center gap-1.5 text-xs text-yellow-500 bg-yellow-500/10 border border-yellow-500/20 rounded-xl px-3 py-1.5">
-            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-            <span>Worker URLs are only supported for Code Runner jobs</span>
-          </div>
-        )}
       </div>
 
-      {job.jobType !== 'code' ? (
-        <div className="p-8 text-center border border-dashed border-border rounded-2xl text-muted-foreground space-y-2">
-          <Code2 className="h-8 w-8 mx-auto text-muted-foreground/50" />
-          <p className="text-xs">Switch this job to a Code Runner type to use Worker URLs.</p>
-        </div>
-      ) : (
-        <>
+      <>
           {/* How it works */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
@@ -297,7 +285,6 @@ export function WorkerUrlPanel({ job }) {
             </div>
           )}
         </>
-      )}
-    </div>
+      </div>
   );
 }

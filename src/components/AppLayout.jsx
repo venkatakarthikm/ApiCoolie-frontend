@@ -29,7 +29,7 @@ import { useAuthStore } from '../store/authStore.js';
 import { apiClient } from '../utils/apiClient.js';
 
 export function AppLayout() {
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, accounts, switchAccount, addAccount, removeAccount } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -433,6 +433,54 @@ export function AppLayout() {
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Account Switcher Section */}
+                  <div className="px-4 py-2 border-b border-border/30 space-y-2">
+                    <span className="font-bold text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                      <UserIcon className="h-3.5 w-3.5" /> Switch Accounts
+                    </span>
+                    <div className="space-y-1.5 max-h-36 overflow-y-auto">
+                      {accounts && accounts.map(acc => {
+                        const isActive = acc.user.id === user?.id;
+                        return (
+                          <div key={acc.user.id} className={`flex items-center justify-between p-1.5 rounded-lg border transition-colors ${isActive ? 'bg-primary/5 border-primary/20' : 'border-transparent hover:bg-muted/15'}`}>
+                            <button
+                              type="button"
+                              onClick={() => !isActive && switchAccount(acc.user.id)}
+                              className="flex items-center gap-2 flex-grow text-left focus:outline-none"
+                              disabled={isActive}
+                              title={isActive ? 'Active account' : `Switch to ${acc.user.fullName}`}
+                            >
+                              <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center text-[9px] font-bold shrink-0">
+                                {acc.user.fullName?.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="truncate pr-1">
+                                <p className={`font-semibold leading-tight ${isActive ? 'text-primary' : 'text-foreground'}`}>{acc.user.fullName}</p>
+                                <p className="text-[8px] text-muted-foreground leading-tight truncate">{acc.user.email}</p>
+                              </div>
+                            </button>
+                            {!isActive && (
+                              <button
+                                type="button"
+                                onClick={() => removeAccount(acc.user.id)}
+                                className="text-red-400 hover:text-red-500 font-bold px-1.5 hover:bg-red-500/10 rounded text-sm"
+                                title="Remove account"
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addAccount}
+                      className="w-full text-center py-1.5 border border-dashed border-border rounded-xl text-primary font-bold hover:bg-primary/5 flex items-center justify-center gap-1 mt-1 text-[10px]"
+                    >
+                      <Plus className="h-3 w-3" /> Add Account
+                    </button>
                   </div>
 
                   <Link

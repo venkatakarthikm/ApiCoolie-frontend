@@ -128,7 +128,7 @@ export function RunOutputPanel({ executionId, onClose }) {
             {execution.responseBody && <CopyButton value={execution.responseBody} />}
           </div>
           {execution.responseBody ? (
-            <pre className="p-3 bg-muted/5 border border-border/40 rounded-lg overflow-x-auto leading-relaxed text-muted-foreground max-h-60 overflow-y-auto">
+            <pre className="p-3 bg-muted/5 border border-border/40 rounded-lg overflow-x-auto leading-relaxed text-muted-foreground max-h-60 overflow-y-auto whitespace-pre-wrap">
               {formattedResponse}
             </pre>
           ) : (
@@ -143,7 +143,7 @@ export function RunOutputPanel({ executionId, onClose }) {
               <span>Response Headers:</span>
               <CopyButton value={execution.responseHeaders} />
             </div>
-            <pre className="p-3 bg-muted/5 border border-border/40 rounded-lg overflow-x-auto leading-relaxed text-muted-foreground max-h-40 overflow-y-auto">
+            <pre className="p-3 bg-muted/5 border border-border/40 rounded-lg overflow-x-auto leading-relaxed text-muted-foreground max-h-40 overflow-y-auto whitespace-pre-wrap">
               {formattedHeaders}
             </pre>
           </div>
