@@ -153,6 +153,15 @@ export function BlogPage() {
           <Helmet>
             <title>{selectedPost.title} | Api Coolie Blog</title>
             <meta name="description" content={selectedPost.summary} />
+            <meta property="og:title" content={`${selectedPost.title} | Api Coolie Blog`} />
+            <meta property="og:description" content={selectedPost.summary} />
+            <meta property="og:type" content="article" />
+            <meta property="og:url" content={`https://apicoolie.stackinfi.in/blog`} />
+            <meta property="og:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={`${selectedPost.title} | Api Coolie Blog`} />
+            <meta name="twitter:description" content={selectedPost.summary} />
+            <meta name="twitter:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
           </Helmet>
           <button
             onClick={() => setSelectedPost(null)}
@@ -196,6 +205,15 @@ export function BlogPage() {
           <Helmet>
             <title>Engineering Blog | Api Coolie</title>
             <meta name="description" content="Read our technical blog for DevOps guides, cron loops, script isolations, and serverless best practices." />
+            <meta property="og:title" content="Engineering Blog | Api Coolie" />
+            <meta property="og:description" content="Read our technical blog for DevOps guides, cron loops, script isolations, and serverless best practices." />
+            <meta property="og:type" content="website" />
+            <meta property="og:url" content="https://apicoolie.stackinfi.in/blog" />
+            <meta property="og:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content="Engineering Blog | Api Coolie" />
+            <meta name="twitter:description" content="Read our technical blog for DevOps guides, cron loops, script isolations, and serverless best practices." />
+            <meta name="twitter:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
           </Helmet>
           <div className="text-center space-y-3">
             <h1 className="text-4xl font-extrabold tracking-tight font-sans">Engineering Blog</h1>

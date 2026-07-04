@@ -66,6 +66,15 @@ export function PricingPage() {
       <Helmet>
         <title>Pricing | Api Coolie</title>
         <meta name="description" content="Flexible pricing plans for Api Coolie. Run scheduled APIs and scripts with 1-second precisions. Get started for free." />
+        <meta property="og:title" content="Pricing | Api Coolie" />
+        <meta property="og:description" content="Flexible pricing plans for Api Coolie. Run scheduled APIs and scripts with 1-second precisions. Get started for free." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://apicoolie.stackinfi.in/pricing" />
+        <meta property="og:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Pricing | Api Coolie" />
+        <meta name="twitter:description" content="Flexible pricing plans for Api Coolie. Run scheduled APIs and scripts with 1-second precisions. Get started for free." />
+        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
       </Helmet>
 
       <div className="text-center space-y-4 max-w-2xl mx-auto">

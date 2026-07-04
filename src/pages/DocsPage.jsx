@@ -107,6 +107,15 @@ def verify_webhook(payload, signature_header, secret_token):
       <Helmet>
         <title>{docTitle} | Api Coolie Docs</title>
         <meta name="description" content={docDesc} />
+        <meta property="og:title" content={`${docTitle} | Api Coolie Docs`} />
+        <meta property="og:description" content={docDesc} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://apicoolie.stackinfi.in/docs" />
+        <meta property="og:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${docTitle} | Api Coolie Docs`} />
+        <meta name="twitter:description" content={docDesc} />
+        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
       </Helmet>
 
       {/* Docs Side Nav */}

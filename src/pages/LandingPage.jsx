@@ -26,6 +26,15 @@ export function LandingPage() {
       <Helmet>
         <title>Api Coolie | Modern Scheduled API Calls & Code Executions</title>
         <meta name="description" content="Api Coolie carries your API payloads and script executors (JS & Python) on precise schedules (cron, intervals, weekly days). Dynamic logs, status badges and AI diagnostics." />
+        <meta property="og:title" content="Api Coolie | Modern Scheduled API Calls & Code Executions" />
+        <meta property="og:description" content="Api Coolie carries your API payloads and script executors (JS & Python) on precise schedules (cron, intervals, weekly days). Dynamic logs, status badges and AI diagnostics." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://apicoolie.stackinfi.in/" />
+        <meta property="og:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Api Coolie | Modern Scheduled API Calls & Code Executions" />
+        <meta name="twitter:description" content="Api Coolie carries your API payloads and script executors (JS & Python) on precise schedules (cron, intervals, weekly days). Dynamic logs, status badges and AI diagnostics." />
+        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
         <script type="application/ld+json">
           {`
             {

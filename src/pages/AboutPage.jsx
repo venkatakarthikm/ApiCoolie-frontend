@@ -8,6 +8,15 @@ export function AboutPage() {
       <Helmet>
         <title>About | Api Coolie</title>
         <meta name="description" content="Discover why we built Api Coolie - the Porter carrying your API payloads and script runners securely on scheduled loops." />
+        <meta property="og:title" content="About | Api Coolie" />
+        <meta property="og:description" content="Discover why we built Api Coolie - the Porter carrying your API payloads and script runners securely on scheduled loops." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://apicoolie.stackinfi.in/about" />
+        <meta property="og:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="About | Api Coolie" />
+        <meta name="twitter:description" content="Discover why we built Api Coolie - the Porter carrying your API payloads and script runners securely on scheduled loops." />
+        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
       </Helmet>
 
       <div className="text-center space-y-4 max-w-2xl mx-auto">

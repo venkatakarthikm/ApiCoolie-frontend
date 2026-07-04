@@ -201,6 +201,15 @@ export function LegalPage() {
       <Helmet>
         <title>{title} | Api Coolie</title>
         <meta name="description" content={desc} />
+        <meta property="og:title" content={`${title} | Api Coolie`} />
+        <meta property="og:description" content={desc} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://apicoolie.stackinfi.in/legal" />
+        <meta property="og:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${title} | Api Coolie`} />
+        <meta name="twitter:description" content={desc} />
+        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
       </Helmet>
 
       {/* Sidebar Navigation */}

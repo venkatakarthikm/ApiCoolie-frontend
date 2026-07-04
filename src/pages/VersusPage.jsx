@@ -19,6 +19,15 @@ export function VersusPage() {
         <title>Alternatives & Versus Comparison | Api Coolie</title>
         <meta name="description" content="Compare Api Coolie with traditional online cron job schedulers, website uptime ping checkers, and premium API execution pipelines. Find the right developer scheduler." />
         <meta name="keywords" content="cron-job.org alternative, easycron alternative, uptimerobot alternative, free cron job scheduler online, schedule api call, webhook monitor" />
+        <meta property="og:title" content="Alternatives & Versus Comparison | Api Coolie" />
+        <meta property="og:description" content="Compare Api Coolie with traditional online cron job schedulers, website uptime ping checkers, and premium API execution pipelines. Find the right developer scheduler." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://apicoolie.stackinfi.in/versus" />
+        <meta property="og:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Alternatives & Versus Comparison | Api Coolie" />
+        <meta name="twitter:description" content="Compare Api Coolie with traditional online cron job schedulers, website uptime ping checkers, and premium API execution pipelines. Find the right developer scheduler." />
+        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
       </Helmet>
 
       {/* Sidebar navigation */}
