@@ -15,7 +15,9 @@ import {
   Clock,
   Activity,
   Globe,
-  Code
+  Code,
+  Copy,
+  AlertTriangle
 } from 'lucide-react';
 import { apiClient } from '../utils/apiClient.js';
 import { showToast } from '../utils/toast.js';
@@ -31,14 +33,18 @@ export function JobsListPage() {
   const [filterStatus, setFilterStatus] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [layout, setLayout] = useState('list'); // 'list' | 'grid' | 'table'
+  const [activeTab, setActiveTab] = useState('active'); // 'active' | 'recycle'
+  const [confirmPermanentDelete, setConfirmPermanentDelete] = useState(null);
+  const [permanentDeleteText, setPermanentDeleteText] = useState('');
 
   // Fetch Jobs List
   const { data: rawJobs, isLoading, error } = useQuery({
-    queryKey: ['jobs', filterType, filterStatus],
+    queryKey: ['jobs', filterType, filterStatus, activeTab],
     queryFn: () => {
       const params = new URLSearchParams();
       if (filterType) params.append('type', filterType);
       if (filterStatus) params.append('status', filterStatus);
+      if (activeTab === 'recycle') params.append('deleted', 'true');
       return apiClient.get(`/jobs?${params.toString()}`);
     },
   });
@@ -54,7 +60,7 @@ export function JobsListPage() {
   const pauseMutation = useMutation({
     mutationFn: (id) => apiClient.post(`/jobs/${id}/pause`),
     onSuccess: () => {
-      queryClient.invalidateQueries(['jobs']);
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
       showToast('Job paused successfully', 'success');
     },
     onError: () => {
@@ -66,7 +72,7 @@ export function JobsListPage() {
   const resumeMutation = useMutation({
     mutationFn: (id) => apiClient.post(`/jobs/${id}/resume`),
     onSuccess: () => {
-      queryClient.invalidateQueries(['jobs']);
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
       showToast('Job resumed successfully', 'success');
     },
     onError: () => {
@@ -78,11 +84,36 @@ export function JobsListPage() {
   const deleteMutation = useMutation({
     mutationFn: (id) => apiClient.delete(`/jobs/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries(['jobs']);
-      showToast('Job deleted successfully', 'success');
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      showToast('Job moved to recycle bin successfully', 'success');
     },
     onError: () => {
       showToast('Failed to delete job', 'error');
+    }
+  });
+
+  // Restore mutation
+  const restoreMutation = useMutation({
+    mutationFn: (id) => apiClient.post(`/jobs/${id}/restore`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      showToast('Job restored from recycle bin successfully', 'success');
+    },
+    onError: (err) => {
+      showToast(`Failed to restore job: ${err.message}`, 'error');
+    }
+  });
+
+  // Permanent Delete mutation
+  const permanentDeleteMutation = useMutation({
+    mutationFn: (id) => apiClient.delete(`/jobs/${id}?permanent=true`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      showToast('Job permanently purged from system.', 'success');
+      setConfirmPermanentDelete(null);
+    },
+    onError: (err) => {
+      showToast(`Purge failed: ${err.message}`, 'error');
     }
   });
 
@@ -90,7 +121,7 @@ export function JobsListPage() {
   const runMutation = useMutation({
     mutationFn: (id) => apiClient.post(`/jobs/${id}/run`),
     onSuccess: () => {
-      queryClient.invalidateQueries(['jobs']);
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
       showToast('Manual trigger successful', 'success');
     },
     onError: () => {
@@ -143,6 +174,32 @@ export function JobsListPage() {
         <Button variant="primary" className="text-xs flex items-center gap-1.5 px-4 py-2" onClick={() => navigate('/jobs/new')}>
           <Plus className="h-4.5 w-4.5" /> Create new Job
         </Button>
+      </div>
+
+      {/* Sub-tabs switcher */}
+      <div className="flex gap-1.5 border-b border-border/40 pb-0 text-xs">
+        <button
+          type="button"
+          onClick={() => setActiveTab('active')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 font-bold transition-all ${
+            activeTab === 'active'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Active & Paused Jobs
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('recycle')}
+          className={`flex items-center gap-1.5 px-4 py-2.5 border-b-2 font-bold transition-all ${
+            activeTab === 'recycle'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Recycle Bin (Deleted)
+        </button>
       </div>
 
       {/* Filters selectors & Layout Picker bar */}
@@ -228,8 +285,10 @@ export function JobsListPage() {
                 return (
                   <div
                     key={job.id}
-                    onClick={() => navigate(`/jobs/${job.id}`)}
-                    className="p-5 border rounded-2xl bg-card hover:shadow-md cursor-pointer transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden group border-border/40 hover:border-primary/40"
+                    onClick={activeTab === 'recycle' ? undefined : () => navigate(`/jobs/${job.id}`)}
+                    className={`p-5 border rounded-2xl bg-card transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden group border-border/40 ${
+                      activeTab === 'recycle' ? '' : 'hover:shadow-md hover:border-primary/40 cursor-pointer'
+                    }`}
                   >
                     {/* Metadata */}
                     <div className="space-y-3 flex-1">
@@ -289,42 +348,67 @@ export function JobsListPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); runMutation.mutate(job.id); }}
-                        disabled={runMutation.isLoading}
-                        className="p-2.5 border border-border/60 hover:bg-muted/10 active:scale-95 rounded-xl text-primary transition-all font-semibold text-xs flex items-center gap-1.5"
-                        title="Trigger run manually"
-                      >
-                        <Play className="h-4 w-4 fill-current" />
-                      </button>
-
-                      {job.status === 'active' ? (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); pauseMutation.mutate(job.id); }}
-                          className="p-2.5 border border-border/60 hover:bg-muted/10 active:scale-95 rounded-xl text-amber-500 transition-all font-semibold text-xs"
-                          title="Pause schedule"
-                        >
-                          <Pause className="h-4 w-4" />
-                        </button>
+                    <div className="flex items-center gap-2 shrink-0 self-end md:self-center" onClick={(e) => e.stopPropagation()}>
+                      {activeTab === 'recycle' ? (
+                        <>
+                          <Button
+                            variant="outline"
+                            onClick={() => restoreMutation.mutate(job.id)}
+                            loading={restoreMutation.isLoading}
+                            className="px-3 py-1.5 text-xs font-semibold text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/5 flex items-center gap-1"
+                          >
+                            Restore
+                          </Button>
+                          <Button
+                            variant="danger"
+                            onClick={() => {
+                              setPermanentDeleteText('');
+                              setConfirmPermanentDelete(job);
+                            }}
+                            className="px-3 py-1.5 text-xs font-bold bg-red-600 hover:bg-red-700 text-white flex items-center gap-1"
+                          >
+                            Purge
+                          </Button>
+                        </>
                       ) : (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); resumeMutation.mutate(job.id); }}
-                          className="p-2.5 border border-border/60 hover:bg-muted/10 active:scale-95 rounded-xl text-emerald-500 transition-all font-semibold text-xs"
-                          title="Resume schedule"
-                        >
-                          <Play className="h-4 w-4" />
-                        </button>
-                      )}
+                        <>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); runMutation.mutate(job.id); }}
+                            disabled={runMutation.isLoading}
+                            className="p-2.5 border border-border/60 hover:bg-muted/10 active:scale-95 rounded-xl text-primary transition-all font-semibold text-xs flex items-center gap-1.5"
+                            title="Trigger run manually"
+                          >
+                            <Play className="h-4 w-4 fill-current" />
+                          </button>
 
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); setConfirmDelete(job.id); }}
-                        className="p-2.5 border border-border/60 hover:bg-red-500/10 active:scale-95 rounded-xl text-red-400 transition-all font-semibold text-xs"
-                        title="Delete job"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                          {job.status === 'active' ? (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); pauseMutation.mutate(job.id); }}
+                              className="p-2.5 border border-border/60 hover:bg-muted/10 active:scale-95 rounded-xl text-amber-500 transition-all font-semibold text-xs"
+                              title="Pause schedule"
+                            >
+                              <Pause className="h-4 w-4" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); resumeMutation.mutate(job.id); }}
+                              className="p-2.5 border border-border/60 hover:bg-muted/10 active:scale-95 rounded-xl text-emerald-500 transition-all font-semibold text-xs"
+                              title="Resume schedule"
+                            >
+                              <Play className="h-4 w-4" />
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); setConfirmDelete(job.id); }}
+                            className="p-2.5 border border-border/60 hover:bg-red-500/10 active:scale-95 rounded-xl text-red-400 transition-all font-semibold text-xs"
+                            title="Delete job"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
@@ -341,8 +425,10 @@ export function JobsListPage() {
                 return (
                   <div
                     key={job.id}
-                    onClick={() => navigate(`/jobs/${job.id}`)}
-                    className="border border-border/40 rounded-2xl bg-card p-6 flex flex-col justify-between space-y-4 hover:shadow-md cursor-pointer transition-all hover:border-primary/45 relative overflow-hidden group"
+                    onClick={activeTab === 'recycle' ? undefined : () => navigate(`/jobs/${job.id}`)}
+                    className={`border border-border/40 rounded-2xl bg-card p-6 flex flex-col justify-between space-y-4 transition-all relative overflow-hidden group ${
+                      activeTab === 'recycle' ? '' : 'hover:shadow-md hover:border-primary/45 cursor-pointer'
+                    }`}
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-2">
@@ -377,7 +463,7 @@ export function JobsListPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between pt-1">
+                      <div className="flex items-center justify-between pt-1" onClick={(e) => e.stopPropagation()}>
                         {/* Health indicators */}
                         <div className="flex gap-1">
                           {job.executions?.slice(0, 4).map((ex) => (
@@ -388,15 +474,38 @@ export function JobsListPage() {
                           ))}
                         </div>
 
-                        {/* Quick run button */}
-                        <button
-                          onClick={(e) => { e.stopPropagation(); runMutation.mutate(job.id); }}
-                          disabled={runMutation.isLoading}
-                          className="p-2 border border-border/60 hover:bg-muted/10 rounded-lg text-primary active:scale-95 transition-all"
-                          title="Run manually"
-                        >
-                          <Play className="h-3.5 w-3.5 fill-current" />
-                        </button>
+                        {activeTab === 'recycle' ? (
+                          <div className="flex gap-1.5">
+                            <Button
+                              variant="outline"
+                              onClick={() => restoreMutation.mutate(job.id)}
+                              loading={restoreMutation.isLoading}
+                              className="px-2.5 py-1 text-[10px] font-bold text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/5"
+                            >
+                              Restore
+                            </Button>
+                            <Button
+                              variant="danger"
+                              onClick={() => {
+                                setPermanentDeleteText('');
+                                setConfirmPermanentDelete(job);
+                              }}
+                              className="px-2.5 py-1 text-[10px] font-bold bg-red-600 hover:bg-red-700 text-white"
+                            >
+                              Purge
+                            </Button>
+                          </div>
+                        ) : (
+                          /* Quick run button */
+                          <button
+                            onClick={(e) => { e.stopPropagation(); runMutation.mutate(job.id); }}
+                            disabled={runMutation.isLoading}
+                            className="p-2 border border-border/60 hover:bg-muted/10 rounded-lg text-primary active:scale-95 transition-all"
+                            title="Run manually"
+                          >
+                            <Play className="h-3.5 w-3.5 fill-current" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -426,8 +535,8 @@ export function JobsListPage() {
                       return (
                         <tr
                           key={job.id}
-                          onClick={() => navigate(`/jobs/${job.id}`)}
-                          className="hover:bg-muted/5 cursor-pointer transition-colors group"
+                          onClick={activeTab === 'recycle' ? undefined : () => navigate(`/jobs/${job.id}`)}
+                          className={`transition-colors group ${activeTab === 'recycle' ? '' : 'hover:bg-muted/5 cursor-pointer'}`}
                         >
                           <td className="p-4 pl-6 font-bold text-sm text-foreground group-hover:text-primary transition-colors">
                             {job.name}
@@ -443,23 +552,46 @@ export function JobsListPage() {
                           </td>
                           <td className="p-4 text-muted-foreground">{lastEditedDate}</td>
                           <td className="p-4 text-right pr-6" onClick={(e) => e.stopPropagation()}>
-                            <div className="inline-flex items-center gap-1.5">
-                              <button
-                                onClick={() => runMutation.mutate(job.id)}
-                                disabled={runMutation.isLoading}
-                                className="p-1.5 border border-border/60 hover:bg-muted/10 rounded-lg text-primary active:scale-95 transition-all"
-                                title="Run now"
-                              >
-                                <Play className="h-3.5 w-3.5 fill-current" />
-                              </button>
-                              <button
-                                onClick={() => setConfirmDelete(job.id)}
-                                className="p-1.5 border border-border/60 hover:bg-red-500/10 rounded-lg text-red-400 active:scale-95 transition-all"
-                                title="Delete"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
+                            {activeTab === 'recycle' ? (
+                              <div className="inline-flex items-center gap-1.5">
+                                <Button
+                                  variant="outline"
+                                  onClick={() => restoreMutation.mutate(job.id)}
+                                  loading={restoreMutation.isLoading}
+                                  className="px-2.5 py-1 text-[10px] font-bold text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/5"
+                                >
+                                  Restore
+                                </Button>
+                                <Button
+                                  variant="danger"
+                                  onClick={() => {
+                                    setPermanentDeleteText('');
+                                    setConfirmPermanentDelete(job);
+                                  }}
+                                  className="px-2.5 py-1 text-[10px] font-bold bg-red-600 hover:bg-red-700 text-white"
+                                >
+                                  Purge
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="inline-flex items-center gap-1.5">
+                                <button
+                                  onClick={() => runMutation.mutate(job.id)}
+                                  disabled={runMutation.isLoading}
+                                  className="p-1.5 border border-border/60 hover:bg-muted/10 rounded-lg text-primary active:scale-95 transition-all"
+                                  title="Run now"
+                                >
+                                  <Play className="h-3.5 w-3.5 fill-current" />
+                                </button>
+                                <button
+                                  onClick={() => setConfirmDelete(job.id)}
+                                  className="p-1.5 border border-border/60 hover:bg-red-500/10 rounded-lg text-red-400 active:scale-95 transition-all"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            )}
                           </td>
                         </tr>
                       );
@@ -472,12 +604,12 @@ export function JobsListPage() {
         </>
       )}
 
-      {/* Confirm Delete Modal */}
+      {/* Confirm Delete Modal (Soft Delete) */}
       <ConfirmModal
         isOpen={!!confirmDelete}
-        title="Delete this job?"
-        message="This will permanently delete the job and all its execution history logs. This action cannot be undone."
-        confirmLabel="Yes, Delete"
+        title="Move job to Recycle Bin?"
+        message="This will temporarily pause the job schedules and stop its Worker URLs. You can restore it from the Recycle Bin within 60 days before it is permanently deleted."
+        confirmLabel="Move to Recycle Bin"
         cancelLabel="Keep Job"
         danger={true}
         onConfirm={() => {
@@ -486,6 +618,81 @@ export function JobsListPage() {
         }}
         onCancel={() => setConfirmDelete(null)}
       />
+
+      {/* Confirm Permanent Purge Modal */}
+      {confirmPermanentDelete && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center px-4"
+          style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}
+        >
+          <div
+            className="bg-card border border-border/60 rounded-2xl shadow-2xl p-6 max-w-md w-full space-y-5 animate-scale"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-foreground leading-tight">Permanently Delete Job?</h3>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  This will permanently destroy the job configuration, analytics data, and all execution history logs. This action is absolute and cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            {/* Instruction with copy/fill helper */}
+            <div className="bg-muted/5 border border-border/40 rounded-xl p-3 text-xs space-y-2">
+              <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Verification Required</span>
+              <div className="flex items-center justify-between gap-2 bg-muted/15 p-2 rounded-lg border border-border/20">
+                <code className="font-mono text-xs text-primary font-bold">apicoolie/{confirmPermanentDelete.name}</code>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPermanentDeleteText(`apicoolie/${confirmPermanentDelete.name}`);
+                    showToast('Code entered into field!', 'success');
+                  }}
+                  className="flex items-center gap-1 text-[10px] font-bold text-primary hover:underline hover:text-primary-light shrink-0"
+                >
+                  <Copy className="h-3 w-3" /> Auto-fill
+                </button>
+              </div>
+            </div>
+
+            {/* Confirmation input */}
+            <div className="space-y-1.5">
+              <input
+                type="text"
+                value={permanentDeleteText}
+                onChange={(e) => setPermanentDeleteText(e.target.value)}
+                placeholder={`Type: apicoolie/${confirmPermanentDelete.name}`}
+                className="w-full px-3 py-2 border border-border rounded-lg text-xs bg-background focus:outline-none focus:border-red-500 font-mono"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-2.5 pt-1">
+              <Button
+                variant="outline"
+                onClick={() => setConfirmPermanentDelete(null)}
+                className="py-1.5 text-xs font-semibold"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                disabled={permanentDeleteText !== `apicoolie/${confirmPermanentDelete.name}`}
+                loading={permanentDeleteMutation.isLoading}
+                onClick={() => permanentDeleteMutation.mutate(confirmPermanentDelete.id)}
+                className="py-1.5 text-xs font-bold"
+              >
+                Permanently Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

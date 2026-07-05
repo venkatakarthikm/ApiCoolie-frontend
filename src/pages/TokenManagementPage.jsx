@@ -34,7 +34,7 @@ export function TokenManagementPage() {
     mutationFn: () => apiClient.post('/tokens', { jobId: jobId || null }),
     onSuccess: (data) => {
       setCreatedToken(data);
-      queryClient.invalidateQueries(['api-tokens']);
+      queryClient.invalidateQueries({ queryKey: ['api-tokens'] });
     },
   });
 
@@ -42,7 +42,7 @@ export function TokenManagementPage() {
   const revokeMutation = useMutation({
     mutationFn: (id) => apiClient.delete(`/tokens/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries(['api-tokens']);
+      queryClient.invalidateQueries({ queryKey: ['api-tokens'] });
       showToast('API Token revoked successfully.', 'success');
     },
   });

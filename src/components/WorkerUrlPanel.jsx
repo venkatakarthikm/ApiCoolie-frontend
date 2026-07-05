@@ -63,7 +63,7 @@ export function WorkerUrlPanel({ job }) {
   const saveCustomSlugMutation = useMutation({
     mutationFn: (slugToSave) => apiClient.post(`/jobs/${job.id}/worker/custom`, { slug: slugToSave }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries(['job', job.id]);
+      queryClient.invalidateQueries({ queryKey: ['job', job.id] });
       showToast('Worker slug saved successfully!', 'success');
       setShowWarningModal(false);
     },
@@ -74,7 +74,7 @@ export function WorkerUrlPanel({ job }) {
   const generateMutation = useMutation({
     mutationFn: () => apiClient.post(`/jobs/${job.id}/worker/generate`),
     onSuccess: (data) => {
-      queryClient.invalidateQueries(['job', job.id]);
+      queryClient.invalidateQueries({ queryKey: ['job', job.id] });
       setCustomSlug(data.workerUrlSlug);
       showToast('Worker URL generated successfully!', 'success');
     },
@@ -85,7 +85,7 @@ export function WorkerUrlPanel({ job }) {
   const toggleMutation = useMutation({
     mutationFn: (enabled) => apiClient.patch(`/jobs/${job.id}/worker/toggle`, { enabled }),
     onSuccess: (data) => {
-      queryClient.invalidateQueries(['job', job.id]);
+      queryClient.invalidateQueries({ queryKey: ['job', job.id] });
       showToast(data.workerUrlEnabled ? 'Worker URL enabled.' : 'Worker URL disabled.', 'success');
     },
     onError: (err) => showToast(err.message, 'error'),

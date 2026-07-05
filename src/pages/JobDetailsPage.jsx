@@ -21,7 +21,10 @@ import {
   RefreshCw,
   Globe,
   Info,
-  Terminal
+  Terminal,
+  Trash2,
+  Copy,
+  AlertTriangle
 } from 'lucide-react';
 import { apiClient } from '../utils/apiClient.js';
 import { Button } from '../components/ui/Button.jsx';
@@ -64,8 +67,8 @@ export function JobDetailsPage() {
   const runMutation = useMutation({
     mutationFn: () => apiClient.post(`/jobs/${id}/run`),
     onSuccess: (data) => {
-      queryClient.invalidateQueries(['job', id]);
-      queryClient.invalidateQueries(['executions', id]);
+      queryClient.invalidateQueries({ queryKey: ['job', id] });
+      queryClient.invalidateQueries({ queryKey: ['executions', id] });
       showToast('Manual run triggered successfully', 'success');
       navigate(`/jobs/${id}/executions/${data.executionId}`);
     },
@@ -78,7 +81,7 @@ export function JobDetailsPage() {
   const pauseMutation = useMutation({
     mutationFn: () => apiClient.post(`/jobs/${id}/pause`),
     onSuccess: () => {
-      queryClient.invalidateQueries(['job', id]);
+      queryClient.invalidateQueries({ queryKey: ['job', id] });
       showToast('Job paused successfully', 'success');
     },
     onError: () => {
@@ -88,7 +91,7 @@ export function JobDetailsPage() {
   const resumeMutation = useMutation({
     mutationFn: () => apiClient.post(`/jobs/${id}/resume`),
     onSuccess: () => {
-      queryClient.invalidateQueries(['job', id]);
+      queryClient.invalidateQueries({ queryKey: ['job', id] });
       showToast('Job resumed successfully', 'success');
     },
     onError: () => {
@@ -118,6 +121,20 @@ export function JobDetailsPage() {
   const [webhookSecurityEnabled, setWebhookSecurityEnabled] = useState(false);
   const [webhookSecurityToken, setWebhookSecurityToken] = useState('');
   const [sendingTestWebhook, setSendingTestWebhook] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+
+  const deleteMutation = useMutation({
+    mutationFn: () => apiClient.delete(`/jobs/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      showToast('Job moved to recycle bin successfully.', 'success');
+      navigate('/jobs');
+    },
+    onError: (err) => {
+      showToast(`Delete failed: ${err.message}`, 'error');
+    }
+  });
 
   // History logs filtering
   const [logFilter, setLogFilter] = useState('all'); // all | today | yesterday | week | last_week | month | year | custom
@@ -486,6 +503,17 @@ export function JobDetailsPage() {
               <Play className="h-3.5 w-3.5 mr-1" /> Resume Job
             </Button>
           )}
+
+          <Button
+            variant="danger"
+            onClick={() => {
+              setDeleteConfirmText('');
+              setShowDeleteModal(true);
+            }}
+            className="text-xs py-2 bg-red-600 hover:bg-red-700 text-white flex items-center gap-1.5 font-bold"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Delete Job
+          </Button>
         </div>
       </div>
 
@@ -1448,6 +1476,85 @@ export function JobDetailsPage() {
         )}
 
       </div>
+
+      {/* Soft-Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center px-4"
+          style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div
+            className="bg-card border border-border/60 rounded-2xl shadow-2xl p-6 max-w-md w-full space-y-5 animate-scale"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-foreground leading-tight">Move Job to Recycle Bin?</h3>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Its schedules will be paused, and worker URLs will stop functioning. You can recover it within 60 days.
+                </p>
+              </div>
+            </div>
+
+            {/* Instruction with copy/fill helper */}
+            <div className="bg-muted/5 border border-border/40 rounded-xl p-3 text-xs space-y-2">
+              <span className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Confirmation Action Required</span>
+              <div className="flex items-center justify-between gap-2 bg-muted/15 p-2 rounded-lg border border-border/20">
+                <code className="font-mono text-xs text-primary font-bold">apicoolie/{job.name}</code>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteConfirmText(`apicoolie/${job.name}`);
+                    showToast('Code entered into field!', 'success');
+                  }}
+                  className="flex items-center gap-1 text-[10px] font-bold text-primary hover:underline hover:text-primary-light shrink-0"
+                  title="Auto-fill confirmation input"
+                >
+                  <Copy className="h-3 w-3" /> Auto-fill
+                </button>
+              </div>
+              <p className="text-[10px] text-muted-foreground">Type or click auto-fill to proceed.</p>
+            </div>
+
+            {/* Confirmation input */}
+            <div className="space-y-1.5">
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder={`Type: apicoolie/${job.name}`}
+                className="w-full px-3 py-2 border border-border rounded-lg text-xs bg-background focus:outline-none focus:border-red-500 font-mono"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-2.5 pt-1">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteModal(false)}
+                className="py-1.5 text-xs font-semibold"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                disabled={deleteConfirmText !== `apicoolie/${job.name}`}
+                loading={deleteMutation.isLoading}
+                onClick={() => deleteMutation.mutate()}
+                className="py-1.5 text-xs font-bold"
+              >
+                Move to Recycle Bin
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

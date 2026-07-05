@@ -166,8 +166,22 @@ export function CodeRunnerPanel({
     setIsRunning(true);
     setCurrentExecutionId(null);
     try {
-      const result = await apiClient.post(`/jobs/${jobId}/test-run`, {});
+      const envVarsObj = {};
+      envs.forEach(r => {
+        if (r.key) envVarsObj[r.key] = r.value;
+      });
+
+      const body = {
+        codeConfig: {
+          language: lang,
+          sourceCode: code,
+          envVars: envVarsObj,
+        }
+      };
+
+      const result = await apiClient.post(`/jobs/${jobId}/test-run`, body);
       setCurrentExecutionId(result.id);
+      showToast('Dry run executed with unsaved code edits!', 'success');
     } catch (error) {
       showToast(`Execution trigger failed: ${error.message}`, 'error');
     } finally {
@@ -216,13 +230,28 @@ export function CodeRunnerPanel({
             )}
           </div>
           
-          <Button
-            onClick={handleTestRun}
-            loading={isRunning}
-            className="px-4 py-1.5 text-xs font-bold bg-green-600 hover:bg-green-700 text-white shrink-0 flex items-center gap-1.5"
-          >
-            <Play className="h-3.5 w-3.5 fill-current" /> Run Script
-          </Button>
+          <div className="flex items-center gap-2">
+            {code !== sourceCode && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setCode(sourceCode || '');
+                  onChangeSourceCode(sourceCode || '');
+                  showToast('Reverted workspace to saved script.', 'info');
+                }}
+                className="px-3 py-1.5 text-xs font-semibold text-muted-foreground border-border/60 hover:bg-muted/10"
+              >
+                Revert to Saved
+              </Button>
+            )}
+            <Button
+              onClick={handleTestRun}
+              loading={isRunning}
+              className="px-4 py-1.5 text-xs font-bold bg-green-600 hover:bg-green-700 text-white shrink-0 flex items-center gap-1.5"
+            >
+              <Play className="h-3.5 w-3.5 fill-current" /> Run Script
+            </Button>
+          </div>
         </div>
 
         {/* Monaco Code Editor & AI Chat Assistant side-by-side */}

@@ -424,7 +424,7 @@ fetch('https://api.ipify.org?format=json')
             <div className="space-y-4">
               <h3 className="text-sm font-extrabold text-foreground">Step 1: Create a Python Code Job</h3>
               <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                Go to Jobs > Create New Job. Select <strong>Code Runner</strong>, language <strong>Python</strong>, and paste the following script:
+                Go to Jobs &gt; Create New Job. Select <strong>Code Runner</strong>, language <strong>Python</strong>, and paste the following script:
               </p>
               <div className="relative border border-border/40 rounded-2xl bg-card overflow-hidden">
                 <div className="absolute right-3 top-3 z-10">
