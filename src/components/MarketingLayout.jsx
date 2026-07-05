@@ -27,13 +27,16 @@ export function MarketingLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-200">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-xl focus:font-bold focus:shadow-lg">
+        Skip to main content
+      </a>
       <header className="fixed top-4 left-0 right-0 z-50 px-4">
         <div className="max-w-6xl mx-auto backdrop-blur-md bg-zinc-950/70 border border-zinc-800/80 shadow-2xl rounded-full px-6 h-14 flex items-center justify-between text-white">
           
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <Link to="/" className="flex items-center hover:opacity-90 transition-opacity">
-              <img src="/Api Coolie text transparent.png" alt="Api Coolie Logo" className="h-7 w-auto object-contain" />
+            <Link to="/" aria-label="Api Coolie Homepage" className="flex items-center hover:opacity-90 transition-opacity">
+              <img src="/api-coolie-text-transparent.webp" alt="Api Coolie Logo" width="130" height="28" className="h-7 w-auto object-contain" />
             </Link>
           </div>
 
@@ -56,6 +59,7 @@ export function MarketingLayout() {
               onClick={toggleTheme}
               className="p-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-white border border-zinc-800"
               title="Toggle Theme"
+              aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
@@ -69,7 +73,12 @@ export function MarketingLayout() {
               </Link>
             ) : (
               <>
-                <Link to="/login" className="text-[11px] font-extrabold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors">Sign in</Link>
+                <Link
+                  to="/login"
+                  className="text-[11px] font-extrabold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors"
+                >
+                  Sign in
+                </Link>
                 <Link
                   to="/signup"
                   className="bg-primary text-white text-[11px] font-extrabold px-4 py-1.5 rounded-full hover:bg-primary/95 transition-all shadow-sm uppercase tracking-wider"
@@ -86,6 +95,7 @@ export function MarketingLayout() {
               type="button"
               onClick={toggleTheme}
               className="p-1.5 rounded-full bg-muted/10 hover:bg-muted/20 transition-colors"
+              aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
@@ -93,6 +103,7 @@ export function MarketingLayout() {
               type="button"
               onClick={() => setMobileMenuOpen(prev => !prev)}
               className="p-1.5 rounded-full hover:bg-muted/10 transition-colors"
+              aria-label="Toggle Menu"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -142,7 +153,7 @@ export function MarketingLayout() {
       </header>
 
       {/* Main Page Content */}
-      <main className={`flex-grow ${isLandingPage ? '' : 'pt-24 md:pt-28'}`}>
+      <main id="main-content" className={`flex-grow ${isLandingPage ? '' : 'pt-24 md:pt-28'}`}>
         <Outlet />
       </main>
 
@@ -151,14 +162,14 @@ export function MarketingLayout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-3">
             <span className="text-base font-extrabold text-primary flex items-center gap-1">
-              <img src="/Api Coolie porter logo.png" className="h-5 w-5 object-contain" /> Api Coolie
+              <img src="/api-coolie-porter-logo.webp" alt="Api Coolie Porter Logo" width="20" height="20" className="h-5 w-5 object-contain" /> Api Coolie
             </span>
             <p className="text-muted-foreground leading-relaxed">
               Automated high-precision task runner carrying your cron loops, script isolates, and endpoint routing configurations on time, every time.
             </p>
           </div>
           <div>
-            <h4 className="font-bold text-foreground mb-3 uppercase tracking-wider text-[10px]">Product</h4>
+            <h3 className="font-bold text-foreground mb-3 uppercase tracking-wider text-[10px]">Product</h3>
             <ul className="space-y-2">
               <li><Link to="/" className="hover:text-primary transition-colors">Features</Link></li>
               <li><Link to="/pricing" className="hover:text-primary transition-colors">Pricing</Link></li>
@@ -168,8 +179,9 @@ export function MarketingLayout() {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-foreground mb-3 uppercase tracking-wider text-[10px]">Resources</h4>
+            <h3 className="font-bold text-foreground mb-3 uppercase tracking-wider text-[10px]">Resources</h3>
             <ul className="space-y-2">
+              <li><Link to="/about" className="hover:text-primary transition-colors">About Us</Link></li>
               <li><Link to="/tutorials" className="hover:text-primary transition-colors">Tutorials</Link></li>
               <li><Link to="/docs" className="hover:text-primary transition-colors">Documentation</Link></li>
               <li><Link to="/blog" className="hover:text-primary transition-colors">Blog</Link></li>
@@ -177,7 +189,7 @@ export function MarketingLayout() {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold text-foreground mb-3 uppercase tracking-wider text-[10px]">Legal Policies</h4>
+            <h3 className="font-bold text-foreground mb-3 uppercase tracking-wider text-[10px]">Legal Policies</h3>
             <ul className="space-y-2">
               <li><Link to="/legal/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
               <li><Link to="/legal/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
@@ -187,8 +199,11 @@ export function MarketingLayout() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-border/20 flex flex-col md:flex-row justify-between items-center gap-4">
           <span>&copy; {new Date().getFullYear()} Api Coolie. Handcrafted with precision.</span>
-          <div className="flex gap-4">
-            <Link to="/contact" className="hover:text-primary">Contact Support</Link>
+          <div className="flex gap-4 items-center">
+            <Link to="/about" className="hover:text-primary transition-colors">About Us</Link>
+            <Link to="/contact" className="hover:text-primary transition-colors">Contact Support</Link>
+            <a href="https://x.com/apicoolie" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">Twitter</a>
+            <a href="https://github.com/apicoolie" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">GitHub</a>
           </div>
         </div>
       </footer>

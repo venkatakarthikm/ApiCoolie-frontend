@@ -54,7 +54,7 @@ export function LoginPage() {
       <div className="max-w-md w-full space-y-6 relative z-10">
         <div className="text-center space-y-2">
           <div className="flex justify-center mb-1">
-            <img src="/Api Coolie porter logo.png" alt="Api Coolie" className="h-12 w-12 object-contain" />
+            <img src="/api-coolie-porter-logo.webp" alt="Api Coolie Logo" width="48" height="48" className="h-12 w-12 object-contain" />
           </div>
           <h2 className="text-2xl font-extrabold tracking-tight text-foreground">Welcome Back</h2>
           <p className="text-xs text-muted-foreground">Sign in to your Api Coolie dashboard workspace.</p>

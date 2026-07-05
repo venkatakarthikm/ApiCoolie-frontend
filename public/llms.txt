@@ -1,0 +1,22 @@
+# Api Coolie - Serverless Scheduler & Runner Platform
+
+Api Coolie is a developer-focused serverless task scheduler platform that runs HTTP API calls and custom JavaScript (Node.js) / Python script execution isolates on precise cron intervals, timezone-aware schedules, or millisecond ticks.
+
+## Core Features
+
+- **API Request Schedulers:** Configure GET/POST/PUT/PATCH/DELETE endpoints, authenticate requests using headers, query parameters, or Bearer keys, and trace execution outputs.
+- **V8 Sandboxed Code Runner:** Execute isolated scripts (JavaScript/Python) inside secure heap blocks, safe from infinite loops, global space contamination, and execution timeouts.
+- **HMAC Webhook Dispatch:** Secure integrations by validating signed webhooks using SHA-256 HMAC headers (`X-Coolie-Signature`).
+- **Response Privacy Filters:** Block specific JSON keys recursively (e.g. `password`, `token`) or redact matching text patterns with `[REDACTED]` automatically before logging or publishing outcomes.
+- **Dynamic Worker URLs:** Expose any scheduled API or runner configuration as a public trigger URL returning dynamically filtered outputs.
+- **Multi-Account Switching:** Sync multiple authenticated sessions in local storage and switch in-place inside the dashboard navbar.
+
+## Document Resources
+
+- [Home Page](https://apicoolie.stackinfi.in/) - Main landing page.
+- [Pricing Plans](https://apicoolie.stackinfi.in/pricing) - Free vs Developer/Team trial details.
+- [Dev Guides & Docs](https://apicoolie.stackinfi.in/docs) - Documentation on scheduling options, V8 limits, and script isolates.
+- [Tutorial Library](https://apicoolie.stackinfi.in/tutorials) - Walkthroughs for Slack integration, DB maintenance, HMAC signatures, and response filtering.
+- [Engineering Blog](https://apicoolie.stackinfi.in/blog) - DevOps articles on dst pitfalls, fault-tolerant queues, and serverless cron.
+- [Product Changelog](https://apicoolie.stackinfi.in/changelog) - Official release logs, features updates, and database patches.
+- [System Status](https://apicoolie.stackinfi.in/status) - Active service uptime and execution latency metrics.

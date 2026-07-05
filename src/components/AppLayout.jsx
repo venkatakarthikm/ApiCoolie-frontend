@@ -151,17 +151,18 @@ export function AppLayout() {
         <div className="h-16 flex items-center justify-between px-4 border-b border-border/40">
           {!sidebarCollapsed ? (
             <Link to="/dashboard" className="flex items-center gap-2">
-              <img src="/Api Coolie text transparent.png" alt="Api Coolie Logo" className="h-10 w-auto object-contain" />
+              <img src="/api-coolie-text-transparent.webp" alt="Api Coolie Logo" width="180" height="40" className="h-10 w-auto object-contain" />
             </Link>
           ) : (
             <Link to="/dashboard" className="mx-auto flex items-center justify-center">
-              <img src="/Api Coolie porter logo.png" alt="Icon" className="h-8 w-8 object-contain" />
+              <img src="/api-coolie-porter-logo.webp" alt="Api Coolie Porter Icon" width="32" height="32" className="h-8 w-8 object-contain" />
             </Link>
           )}
           <button
             type="button"
             onClick={() => setSidebarCollapsed(p => !p)}
             className="absolute -right-4 top-6 bg-card border border-border/60 hover:bg-muted/10 rounded-full p-1.5 text-muted-foreground hover:text-foreground shadow-sm"
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
@@ -171,7 +172,7 @@ export function AppLayout() {
         <div className="p-4 border-b border-border/40 flex items-center gap-3">
           <div className="relative shrink-0">
             {user?.avatarUrl ? (
-              <img src={user.avatarUrl} className="h-9 w-9 rounded-full border border-primary/20 object-cover" />
+              <img src={user.avatarUrl} alt={user?.fullName || "User avatar"} className="h-9 w-9 rounded-full border border-primary/20 object-cover" />
             ) : (
               <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm">
                 {user?.fullName?.charAt(0).toUpperCase()}
@@ -389,9 +390,10 @@ export function AppLayout() {
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                 className="flex items-center gap-2 focus:outline-none"
+                aria-label="User menu"
               >
                 {user?.avatarUrl ? (
-                  <img src={user.avatarUrl} className="h-8 w-8 rounded-full border border-primary/20 object-cover" />
+                  <img src={user.avatarUrl} alt={user?.fullName || "User profile"} className="h-8 w-8 rounded-full border border-primary/20 object-cover" />
                 ) : (
                   <div className="h-8 w-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xs font-bold font-mono">
                     {user?.fullName?.charAt(0).toUpperCase()}

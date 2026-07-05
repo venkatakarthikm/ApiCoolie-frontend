@@ -25,16 +25,17 @@ export function LandingPage() {
     <div className="relative min-h-screen bg-background text-foreground overflow-x-hidden w-full">
       <Helmet>
         <title>Api Coolie | Modern Scheduled API Calls & Code Executions</title>
-        <meta name="description" content="Api Coolie carries your API payloads and script executors (JS & Python) on precise schedules (cron, intervals, weekly days). Dynamic logs, status badges and AI diagnostics." />
+        <meta name="description" content="Api Coolie is a serverless cron job scheduler to deploy and schedule API calls & custom JS/Python scripts with detailed execution logs and status badges." />
+        <link rel="canonical" href="https://apicoolie.stackinfi.in/" />
         <meta property="og:title" content="Api Coolie | Modern Scheduled API Calls & Code Executions" />
-        <meta property="og:description" content="Api Coolie carries your API payloads and script executors (JS & Python) on precise schedules (cron, intervals, weekly days). Dynamic logs, status badges and AI diagnostics." />
+        <meta property="og:description" content="Api Coolie is a serverless cron job scheduler to deploy and schedule API calls & custom JS/Python scripts with detailed execution logs and status badges." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://apicoolie.stackinfi.in/" />
-        <meta property="og:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+        <meta property="og:image" content="https://apicoolie.stackinfi.in/api-coolie-og.webp" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Api Coolie | Modern Scheduled API Calls & Code Executions" />
-        <meta name="twitter:description" content="Api Coolie carries your API payloads and script executors (JS & Python) on precise schedules (cron, intervals, weekly days). Dynamic logs, status badges and AI diagnostics." />
-        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+        <meta name="twitter:description" content="Api Coolie is a serverless cron job scheduler to deploy and schedule API calls & custom JS/Python scripts with detailed execution logs and status badges." />
+        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/api-coolie-og.webp" />
         <script type="application/ld+json">
           {`
             {

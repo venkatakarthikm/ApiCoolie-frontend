@@ -86,15 +86,16 @@ export function ChangelogPage() {
       <Helmet>
         <title>Changelog | Api Coolie</title>
         <meta name="description" content="Official release log and version changes overview for Api Coolie platform." />
+        <link rel="canonical" href="https://apicoolie.stackinfi.in/changelog" />
         <meta property="og:title" content="Changelog | Api Coolie" />
         <meta property="og:description" content="Official release log and version changes overview for Api Coolie platform." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://apicoolie.stackinfi.in/changelog" />
-        <meta property="og:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+        <meta property="og:image" content="https://apicoolie.stackinfi.in/api-coolie-og.webp" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Changelog | Api Coolie" />
         <meta name="twitter:description" content="Official release log and version changes overview for Api Coolie platform." />
-        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/api-coolie-og.webp" />
       </Helmet>
 
       <div className="text-center space-y-3">

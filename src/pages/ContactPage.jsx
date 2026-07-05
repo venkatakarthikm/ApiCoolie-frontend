@@ -20,6 +20,17 @@ export function ContactPage() {
     <div className="max-w-md mx-auto px-4 py-16 sm:py-24 space-y-8">
       <Helmet>
         <title>Contact Support | Api Coolie</title>
+        <meta name="description" content="Reach out to Api Coolie support for help with serverless API triggers, sandboxed VM runners, status logs, or pricing plans." />
+        <link rel="canonical" href="https://apicoolie.stackinfi.in/contact" />
+        <meta property="og:title" content="Contact Support | Api Coolie" />
+        <meta property="og:description" content="Reach out to Api Coolie support for help with serverless API triggers, sandboxed VM runners, status logs, or pricing plans." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://apicoolie.stackinfi.in/contact" />
+        <meta property="og:image" content="https://apicoolie.stackinfi.in/api-coolie-og.webp" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Contact Support | Api Coolie" />
+        <meta name="twitter:description" content="Reach out to Api Coolie support for help with serverless API triggers, sandboxed VM runners, status logs, or pricing plans." />
+        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/api-coolie-og.webp" />
       </Helmet>
 
       <div className="text-center space-y-3">

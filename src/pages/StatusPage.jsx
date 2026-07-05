@@ -15,6 +15,16 @@ export function StatusPage() {
       <Helmet>
         <title>System Status | Api Coolie</title>
         <meta name="description" content="Live uptime metrics and service health reports for Api Coolie API and scheduler task loops." />
+        <link rel="canonical" href="https://apicoolie.stackinfi.in/status" />
+        <meta property="og:title" content="System Status | Api Coolie" />
+        <meta property="og:description" content="Live uptime metrics and service health reports for Api Coolie API and scheduler task loops." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://apicoolie.stackinfi.in/status" />
+        <meta property="og:image" content="https://apicoolie.stackinfi.in/api-coolie-og.webp" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="System Status | Api Coolie" />
+        <meta name="twitter:description" content="Live uptime metrics and service health reports for Api Coolie API and scheduler task loops." />
+        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/api-coolie-og.webp" />
       </Helmet>
 
       {/* Main Status Header Banner */}

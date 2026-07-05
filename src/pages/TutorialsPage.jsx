@@ -216,15 +216,16 @@ fetch('https://api.ipify.org?format=json')
       <Helmet>
         <title>{tutTitle} | Api Coolie</title>
         <meta name="description" content={tutDesc} />
+        <link rel="canonical" href={`https://apicoolie.stackinfi.in/tutorials?tab=${activeTab}`} />
         <meta property="og:title" content={`${tutTitle} | Api Coolie`} />
         <meta property="og:description" content={tutDesc} />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://apicoolie.stackinfi.in/tutorials" />
-        <meta property="og:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+        <meta property="og:url" content={`https://apicoolie.stackinfi.in/tutorials?tab=${activeTab}`} />
+        <meta property="og:image" content="https://apicoolie.stackinfi.in/api-coolie-og.webp" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${tutTitle} | Api Coolie`} />
         <meta name="twitter:description" content={tutDesc} />
-        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/Api%20Coolie.png" />
+        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/api-coolie-og.webp" />
       </Helmet>
 
       {/* Sidebar Navigation */}
