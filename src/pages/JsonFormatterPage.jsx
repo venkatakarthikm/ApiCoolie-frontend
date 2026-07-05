@@ -235,6 +235,17 @@ export function JsonFormatterPage() {
     <div className="space-y-6 animate-scale h-full flex flex-col">
       <Helmet>
         <title>JSON Formatting Suite & Converters | Api Coolie</title>
+        <meta name="description" content="Validate, format, prettify, sort, and convert JSON payloads to XML, YAML, CSV, or TSV dynamically with Api Coolie's free online suite." />
+        <link rel="canonical" href="https://apicoolie.stackinfi.in/tools/json-formatter" />
+        <meta property="og:title" content="JSON Formatting Suite & Converters | Api Coolie" />
+        <meta property="og:description" content="Validate, format, prettify, sort, and convert JSON payloads to XML, YAML, CSV, or TSV dynamically with Api Coolie's free online suite." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://apicoolie.stackinfi.in/tools/json-formatter" />
+        <meta property="og:image" content="https://apicoolie.stackinfi.in/api-coolie-og.webp" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="JSON Formatting Suite & Converters | Api Coolie" />
+        <meta name="twitter:description" content="Validate, format, prettify, sort, and convert JSON payloads to XML, YAML, CSV, or TSV dynamically with Api Coolie's free online suite." />
+        <meta name="twitter:image" content="https://apicoolie.stackinfi.in/api-coolie-og.webp" />
       </Helmet>
 
       <div className="flex items-center justify-between border-b border-border/40 pb-4">
