@@ -254,6 +254,17 @@ export function JobDetailsPage() {
       setWebhookSecurityEnabled(delivery.security?.enabled || false);
       setWebhookSecurityToken(delivery.security?.token || '');
 
+      setScheduleConfig({
+        scheduleType: job.scheduleType,
+        timezone: job.timezone || 'UTC',
+        cronExpression: job.cronExpression,
+        intervalMs: job.intervalMs ? Number(job.intervalMs) : null,
+        weeklyDays: job.weeklyDays || [],
+        runTime: job.runTime,
+        retryPolicy: job.retryPolicy,
+        repeatUntilMatch: job.repeatUntilMatch,
+      });
+
       if (job.jobType === 'api' && job.apiConfig) {
         const config = job.apiConfig;
         setApiMethod(config.method);
