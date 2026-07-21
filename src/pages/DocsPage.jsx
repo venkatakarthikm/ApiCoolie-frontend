@@ -419,7 +419,7 @@ def verify_webhook(payload, signature_header, secret_token):
                 Open any job's Settings tab and navigate to Worker URL. You can generate a random secure slug or set a custom one. Once enabled, any HTTP request to:
               </p>
               <div className="border border-border/40 rounded-2xl bg-muted/5 p-4 font-mono text-xs text-primary">
-                GET https://apicoolie-backend.onrender.com/w/YOUR-SLUG
+                GET http://localhost:4000/w/YOUR-SLUG
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 will immediately execute the job and return the output in the HTTP response body. Both API and Code jobs support Worker URLs. JSON outputs are returned with <code>application/json</code> content-type automatically.

@@ -1,6 +1,6 @@
 import { useAuthStore } from '../store/authStore.js';
 
-const backendOrigin = import.meta.env.VITE_BACKEND_API_URL || 'https://apicoolie-backend.onrender.';
+const backendOrigin = import.meta.env.VITE_BACKEND_API_URL || 'https://apicoolie-b-end.onrender.';
 const BACKEND_API_URL = `${backendOrigin}/api/v1`;
 
 async function request(endpoint, options = {}) {

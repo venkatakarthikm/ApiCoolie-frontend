@@ -40,7 +40,7 @@ export function BadgeGenerator({ jobId, jobName }) {
   }
 
   // Build target URL paths
-  const backendUrl = import.meta.env.VITE_BACKEND_API_URL || 'https://apicoolie-backend.onrender.com';
+  const backendUrl = import.meta.env.VITE_BACKEND_API_URL || 'https://apicoolie-b-end.onrender.com';
   const baseBadgeUrl = `${backendUrl}/badge/${badge.slug}`;
   const svgUrl = `${baseBadgeUrl}.svg`;
   const jsonUrl = `${baseBadgeUrl}.json`;
