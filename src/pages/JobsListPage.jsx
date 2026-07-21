@@ -61,6 +61,8 @@ export function JobsListPage() {
     mutationFn: (id) => apiClient.post(`/jobs/${id}/pause`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
       showToast('Job paused successfully', 'success');
     },
     onError: () => {
@@ -73,6 +75,8 @@ export function JobsListPage() {
     mutationFn: (id) => apiClient.post(`/jobs/${id}/resume`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
       showToast('Job resumed successfully', 'success');
     },
     onError: () => {
@@ -85,6 +89,8 @@ export function JobsListPage() {
     mutationFn: (id) => apiClient.delete(`/jobs/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
       showToast('Job moved to recycle bin successfully', 'success');
     },
     onError: () => {
@@ -97,6 +103,8 @@ export function JobsListPage() {
     mutationFn: (id) => apiClient.post(`/jobs/${id}/restore`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
       showToast('Job restored from recycle bin successfully', 'success');
     },
     onError: (err) => {
@@ -109,6 +117,9 @@ export function JobsListPage() {
     mutationFn: (id) => apiClient.delete(`/jobs/${id}?permanent=true`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
+      queryClient.invalidateQueries({ queryKey: ['global-executions'] });
       showToast('Job permanently purged from system.', 'success');
       setConfirmPermanentDelete(null);
     },
@@ -122,6 +133,9 @@ export function JobsListPage() {
     mutationFn: (id) => apiClient.post(`/jobs/${id}/run`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['global-executions'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-executions'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
       showToast('Manual trigger successful', 'success');
     },
     onError: () => {

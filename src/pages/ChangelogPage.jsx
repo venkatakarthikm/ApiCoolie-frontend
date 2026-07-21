@@ -5,6 +5,28 @@ import { Tag, Calendar, Sparkles } from 'lucide-react';
 export function ChangelogPage() {
   const versions = [
     {
+      version: 'v1.5.0',
+      date: 'July 21, 2026',
+      badge: 'Latest',
+      changes: [
+        { type: 'added', text: 'Curl Runner tool — paste or type curl commands, execute them instantly, and inspect full HTTP responses with headers, status codes, and timing.' },
+        { type: 'added', text: 'Save, edit, load, and delete named curl commands for quick reuse without re-typing.' },
+        { type: 'added', text: 'Smart cache invalidation across all pages — creating, updating, pausing, resuming, or deleting a job now instantly refreshes the dashboard, job list, executions, sidebar badges, and activity log.' },
+        { type: 'added', text: 'Window focus refetching — switching browser tabs or returning to the app now automatically refreshes stale data.' },
+        { type: 'added', text: 'Auto-polling on Dashboard (30s), Global Executions (30s), Activity Log (30s), Job Executions tab (15s), and Execution Detail page (3s while running).' },
+        { type: 'added', text: 'Backend gzip compression middleware (level 6) reducing all API response payloads by 60-80%.' },
+        { type: 'added', text: 'Lightweight /jobs/badges endpoint returning only active count and failure status — replaces full job polling in sidebar.' },
+        { type: 'changed', text: 'Jobs list API now returns display-only fields (name, status, schedule) without apiConfig or codeConfig payloads, reducing list response size significantly.' },
+        { type: 'changed', text: 'All frontend pages are now lazy-loaded via React.lazy() for smaller initial bundle size.' },
+        { type: 'changed', text: 'Removed Hyperspeed Three.js hero animation — replaced with lightweight CSS gradient animation.' },
+        { type: 'changed', text: 'Scrollbar track/thumb colors now use theme CSS variables instead of hardcoded black, adapting to light/dark/neon/metallic themes.' },
+        { type: 'changed', text: 'Removed three.js and postprocessing dependencies from frontend bundle (~500KB+ savings).' },
+        { type: 'fixed', text: 'Dashboard no longer makes redundant /jobs fetch inside the recent-executions query.' },
+        { type: 'fixed', text: 'JobCreatePage now properly invalidates the jobs list cache after creating a new job.' },
+        { type: 'fixed', text: 'JobDetailsPage updateMutation now refreshes the jobs list, stats, and activity log instead of only updating local cache.' },
+      ],
+    },
+    {
       version: 'v1.4.0',
       date: 'July 05, 2026',
       badge: 'Latest',

@@ -9,6 +9,7 @@ export function ActivityLogPage() {
   const { data: logs, isLoading, error, refetch } = useQuery({
     queryKey: ['audit-activity'],
     queryFn: () => apiClient.get('/jobs/activity'),
+    refetchInterval: 30000,
   });
 
   const getActionColor = (action) => {

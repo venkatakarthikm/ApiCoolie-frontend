@@ -1,42 +1,49 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { MarketingLayout } from './components/MarketingLayout.jsx';
 import { AppLayout } from './components/AppLayout.jsx';
 
-// Public pages
-import { LandingPage } from './pages/LandingPage.jsx';
-import { AboutPage } from './pages/AboutPage.jsx';
-import { PricingPage } from './pages/PricingPage.jsx';
-import { DocsPage } from './pages/DocsPage.jsx';
-import { BlogPage } from './pages/BlogPage.jsx';
-import { StatusPage } from './pages/StatusPage.jsx';
-import { ChangelogPage } from './pages/ChangelogPage.jsx';
-import { ContactPage } from './pages/ContactPage.jsx';
-import { LegalPage } from './pages/LegalPage.jsx';
-import { NotFoundPage } from './pages/NotFoundPage.jsx';
+// Public pages (lazy-loaded to reduce initial bundle size)
+const LandingPage = lazy(() => import('./pages/LandingPage.jsx').then(m => ({ default: m.LandingPage })));
+const AboutPage = lazy(() => import('./pages/AboutPage.jsx').then(m => ({ default: m.AboutPage })));
+const PricingPage = lazy(() => import('./pages/PricingPage.jsx').then(m => ({ default: m.PricingPage })));
+const DocsPage = lazy(() => import('./pages/DocsPage.jsx').then(m => ({ default: m.DocsPage })));
+const BlogPage = lazy(() => import('./pages/BlogPage.jsx').then(m => ({ default: m.BlogPage })));
+const StatusPage = lazy(() => import('./pages/StatusPage.jsx').then(m => ({ default: m.StatusPage })));
+const ChangelogPage = lazy(() => import('./pages/ChangelogPage.jsx').then(m => ({ default: m.ChangelogPage })));
+const ContactPage = lazy(() => import('./pages/ContactPage.jsx').then(m => ({ default: m.ContactPage })));
+const LegalPage = lazy(() => import('./pages/LegalPage.jsx').then(m => ({ default: m.LegalPage })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage.jsx').then(m => ({ default: m.NotFoundPage })));
 
-// Auth pages
-import { LoginPage } from './pages/LoginPage.jsx';
-import { SignupPage } from './pages/SignupPage.jsx';
-import { OAuthCallbackPage } from './pages/OAuthCallbackPage.jsx';
-import { TutorialsPage } from './pages/TutorialsPage.jsx';
+// Auth pages (lazy-loaded)
+const LoginPage = lazy(() => import('./pages/LoginPage.jsx').then(m => ({ default: m.LoginPage })));
+const SignupPage = lazy(() => import('./pages/SignupPage.jsx').then(m => ({ default: m.SignupPage })));
+const OAuthCallbackPage = lazy(() => import('./pages/OAuthCallbackPage.jsx').then(m => ({ default: m.OAuthCallbackPage })));
+const TutorialsPage = lazy(() => import('./pages/TutorialsPage.jsx').then(m => ({ default: m.TutorialsPage })));
 
-// Dashboard / App pages
-import { DashboardPage } from './pages/DashboardPage.jsx';
-import { JobsListPage } from './pages/JobsListPage.jsx';
-import { JobCreatePage } from './pages/JobCreatePage.jsx';
-import { JobDetailsPage } from './pages/JobDetailsPage.jsx';
-import { ExecutionDetailsPage } from './pages/ExecutionDetailsPage.jsx';
-import { TokenManagementPage } from './pages/TokenManagementPage.jsx';
-import { SettingsPage } from './pages/SettingsPage.jsx';
+// Dashboard / App pages (lazy-loaded)
+const DashboardPage = lazy(() => import('./pages/DashboardPage.jsx').then(m => ({ default: m.DashboardPage })));
+const JobsListPage = lazy(() => import('./pages/JobsListPage.jsx').then(m => ({ default: m.JobsListPage })));
+const JobCreatePage = lazy(() => import('./pages/JobCreatePage.jsx').then(m => ({ default: m.JobCreatePage })));
+const JobDetailsPage = lazy(() => import('./pages/JobDetailsPage.jsx').then(m => ({ default: m.JobDetailsPage })));
+const ExecutionDetailsPage = lazy(() => import('./pages/ExecutionDetailsPage.jsx').then(m => ({ default: m.ExecutionDetailsPage })));
+const TokenManagementPage = lazy(() => import('./pages/TokenManagementPage.jsx').then(m => ({ default: m.TokenManagementPage })));
+const SettingsPage = lazy(() => import('./pages/SettingsPage.jsx').then(m => ({ default: m.SettingsPage })));
 
-// New Pages
-import { ExecutionsListPage } from './pages/ExecutionsListPage.jsx';
-import { ActivityLogPage } from './pages/ActivityLogPage.jsx';
-import { TemplatesPage } from './pages/TemplatesPage.jsx';
-import { BillingPage } from './pages/BillingPage.jsx';
-import { JsonFormatterPage } from './pages/JsonFormatterPage.jsx';
-import { VersusPage } from './pages/VersusPage.jsx';
+// New Pages (lazy-loaded)
+const ExecutionsListPage = lazy(() => import('./pages/ExecutionsListPage.jsx').then(m => ({ default: m.ExecutionsListPage })));
+const ActivityLogPage = lazy(() => import('./pages/ActivityLogPage.jsx').then(m => ({ default: m.ActivityLogPage })));
+const TemplatesPage = lazy(() => import('./pages/TemplatesPage.jsx').then(m => ({ default: m.TemplatesPage })));
+const BillingPage = lazy(() => import('./pages/BillingPage.jsx').then(m => ({ default: m.BillingPage })));
+const JsonFormatterPage = lazy(() => import('./pages/JsonFormatterPage.jsx').then(m => ({ default: m.JsonFormatterPage })));
+const CurlRunnerPage = lazy(() => import('./pages/CurlRunnerPage.jsx').then(m => ({ default: m.CurlRunnerPage })));
+const VersusPage = lazy(() => import('./pages/VersusPage.jsx').then(m => ({ default: m.VersusPage })));
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[50vh]">
+    <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 export default function App() {
   // Initialize dark/light mode classes on initial mount
@@ -50,6 +57,7 @@ export default function App() {
   }, []);
 
   return (
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       
       {/* 1. MARKETING / PUBLIC SHELL ROUTES */}
@@ -92,6 +100,7 @@ export default function App() {
         <Route path="/templates" element={<TemplatesPage />} />
         <Route path="/billing" element={<BillingPage />} />
         <Route path="/json-formatter" element={<JsonFormatterPage />} />
+        <Route path="/curl-runner" element={<CurlRunnerPage />} />
         <Route path="/tokens" element={<TokenManagementPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
@@ -101,5 +110,6 @@ export default function App() {
       <Route path="*" element={<Navigate to="/404" replace />} />
 
     </Routes>
+    </Suspense>
   );
 }

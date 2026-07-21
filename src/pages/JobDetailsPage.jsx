@@ -56,6 +56,10 @@ export function JobDetailsPage() {
     mutationFn: (body) => apiClient.patch(`/jobs/${id}`, body),
     onSuccess: (data) => {
       queryClient.setQueryData(['job', id], data);
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['stats', id] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
       showToast('Job configuration updated successfully.', 'success');
     },
     onError: (err) => {
@@ -69,6 +73,11 @@ export function JobDetailsPage() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['job', id] });
       queryClient.invalidateQueries({ queryKey: ['executions', id] });
+      queryClient.invalidateQueries({ queryKey: ['global-executions'] });
+      queryClient.invalidateQueries({ queryKey: ['stats', id] });
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['recent-executions'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
       showToast('Manual run triggered successfully', 'success');
       navigate(`/jobs/${id}/executions/${data.executionId}`);
     },
@@ -82,6 +91,9 @@ export function JobDetailsPage() {
     mutationFn: () => apiClient.post(`/jobs/${id}/pause`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['job', id] });
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
       showToast('Job paused successfully', 'success');
     },
     onError: () => {
@@ -92,6 +104,9 @@ export function JobDetailsPage() {
     mutationFn: () => apiClient.post(`/jobs/${id}/resume`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['job', id] });
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
       showToast('Job resumed successfully', 'success');
     },
     onError: () => {
@@ -104,6 +119,7 @@ export function JobDetailsPage() {
     queryKey: ['executions', id],
     queryFn: () => apiClient.get(`/jobs/${id}/executions?limit=30`),
     enabled: !!id,
+    refetchInterval: 15000,
   });
 
   // Stats query
@@ -128,6 +144,9 @@ export function JobDetailsPage() {
     mutationFn: () => apiClient.delete(`/jobs/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-badges'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
+      queryClient.invalidateQueries({ queryKey: ['global-executions'] });
       showToast('Job moved to recycle bin successfully.', 'success');
       navigate('/jobs');
     },

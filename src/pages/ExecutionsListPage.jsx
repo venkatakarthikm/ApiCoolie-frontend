@@ -18,6 +18,7 @@ export function ExecutionsListPage() {
       if (statusFilter) params.append('status', statusFilter);
       return apiClient.get(`/executions?${params.toString()}`);
     },
+    refetchInterval: 30000,
   });
 
   const filteredList = (executions || []).filter(ex => {

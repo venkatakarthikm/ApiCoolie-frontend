@@ -17,6 +17,11 @@ export function ExecutionDetailsPage() {
     queryKey: ['execution-details', executionId],
     queryFn: () => apiClient.get(`/executions/${executionId}`),
     enabled: !!executionId,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      if (status === 'queued' || status === 'running') return 3000;
+      return false;
+    },
   });
 
   // Fetch job details (to display job name)

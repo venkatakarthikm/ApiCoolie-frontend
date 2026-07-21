@@ -35,6 +35,7 @@ export function TokenManagementPage() {
     onSuccess: (data) => {
       setCreatedToken(data);
       queryClient.invalidateQueries({ queryKey: ['api-tokens'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
     },
   });
 
@@ -43,6 +44,7 @@ export function TokenManagementPage() {
     mutationFn: (id) => apiClient.delete(`/tokens/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['api-tokens'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
       showToast('API Token revoked successfully.', 'success');
     },
   });

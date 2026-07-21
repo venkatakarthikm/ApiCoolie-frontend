@@ -108,16 +108,26 @@ code, pre {
 }
 
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: rgb(var(--muted-rgb));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: rgb(var(--primary-rgb));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: rgb(var(--secondary-rgb));
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 8s ease infinite;
 }
 
 @keyframes marquee {

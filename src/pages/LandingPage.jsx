@@ -1,21 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Zap, ArrowRight, Play, Calendar, Code2, Cpu, ChevronDown, HelpCircle, Globe } from 'lucide-react';
 import { Button } from '../components/ui/Button.jsx';
-import Hyperspeed from '../components/Hyperspeed.jsx';
 
 export function LandingPage() {
-  const [showHyperspeed, setShowHyperspeed] = useState(false);
-  const [webglFailed, setWebglFailed] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState(null);
-
-  useEffect(() => {
-    const t1 = setTimeout(() => {
-      setShowHyperspeed(true);
-    }, 100);
-    return () => clearTimeout(t1);
-  }, []);
 
   const toggleFaq = (index) => {
     setExpandedFaq(expandedFaq === index ? null : index);
@@ -105,15 +95,13 @@ export function LandingPage() {
         </script>
       </Helmet>
 
-      {/* Hero Header Section with Hyperspeed background (Permanently Dark) */}
-      <div className="relative min-h-[100vh] py-20 flex flex-col justify-center items-center overflow-hidden border-b border-zinc-900 bg-black text-white w-full">
-        {/* Hyperspeed background component */}
-        <div 
-          className="absolute inset-0 z-0 transition-opacity duration-1000 ease-in-out pointer-events-none w-full h-full"
-          style={{ opacity: showHyperspeed ? (webglFailed ? 0.9 : 0.45) : 0 }}
-        >
-          <Hyperspeed onWebGLFailed={() => setWebglFailed(true)} />
-        </div>
+      {/* Hero Header Section with animated gradient background */}
+      <div className="relative min-h-[100vh] py-20 flex flex-col justify-center items-center overflow-hidden border-b border-border bg-gradient-to-br from-black via-zinc-900 to-black text-white w-full">
+        {/* Animated gradient overlay */}
+        <div className="absolute inset-0 z-0 opacity-30 pointer-events-none w-full h-full animate-gradient-shift" style={{
+          background: 'linear-gradient(-45deg, #8E70CF, #10b981, #3b82f6, #8E70CF)',
+          backgroundSize: '400% 400%'
+        }} />
 
         {/* Content wrapper */}
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center justify-center text-center px-4 space-y-8">

@@ -27,19 +27,21 @@ export function DashboardPage() {
   const { data: jobs, isLoading: loadingJobs } = useQuery({
     queryKey: ['jobs'],
     queryFn: () => apiClient.get('/jobs'),
+    refetchInterval: 30000,
   });
 
   const { data: executions, isLoading: loadingExecutions } = useQuery({
     queryKey: ['recent-executions'],
     queryFn: async () => {
-      const allJobs = await apiClient.get('/jobs');
-      if (allJobs.length === 0) return [];
-      const promises = allJobs.slice(0, 5).map(job =>
-        apiClient.get(`/jobs/${job.id}/executions?limit=5`)
+      if (!jobs || jobs.length === 0) return [];
+      const jobIds = jobs.slice(0, 5).map(j => j.id);
+      const results = await Promise.all(
+        jobIds.map(id => apiClient.get(`/jobs/${id}/executions?limit=5`))
       );
-      const results = await Promise.all(promises);
       return results.flat().sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt));
     },
+    enabled: !!jobs && jobs.length > 0,
+    refetchInterval: 30000,
   });
 
   const isLoading = loadingJobs || loadingExecutions;

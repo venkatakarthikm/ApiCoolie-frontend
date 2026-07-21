@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
 import { Globe, Code2, ArrowLeft } from 'lucide-react';
 import { Button } from '../components/ui/Button.jsx';
@@ -12,6 +13,7 @@ export function JobCreatePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialType = searchParams.get('type');
+  const queryClient = useQueryClient();
 
   const [jobType, setJobType] = useState(initialType || '');
   const [step, setStep] = useState(initialType ? 2 : 1);
@@ -181,6 +183,8 @@ export function JobCreatePage() {
 
     try {
       const created = await apiClient.post('/jobs', body);
+      await queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      await queryClient.invalidateQueries({ queryKey: ['audit-activity'] });
       navigate(`/jobs/${created.id}`);
     } catch (err) {
       setError(err.message || 'Failed to create job.');

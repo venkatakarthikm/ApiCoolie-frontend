@@ -23,7 +23,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Activity,
-  Palette
+  Palette,
+  Play
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore.js';
 import { apiClient } from '../utils/apiClient.js';
@@ -42,23 +43,16 @@ export function AppLayout() {
   const profileRef = useRef(null);
   const bellRef = useRef(null);
 
-  // Poll jobs & executions to dynamically update sidebar badges
-  const { data: jobs } = useQuery({
-    queryKey: ['sidebar-jobs'],
-    queryFn: () => apiClient.get('/jobs'),
-    refetchInterval: 15000,
+  // Poll lightweight badge counts instead of full job+execution data
+  const { data: badges } = useQuery({
+    queryKey: ['sidebar-badges'],
+    queryFn: () => apiClient.get('/jobs/badges'),
+    refetchInterval: 20000,
     enabled: isAuthenticated
   });
 
-  const { data: executions } = useQuery({
-    queryKey: ['sidebar-executions'],
-    queryFn: () => apiClient.get('/executions?limit=10'),
-    refetchInterval: 15000,
-    enabled: isAuthenticated
-  });
-
-  const activeJobsCount = jobs?.filter(j => j.status === 'active').length || 0;
-  const hasFailedExecution = executions?.some(ex => ex.status === 'failed') || false;
+  const activeJobsCount = badges?.activeJobs || 0;
+  const hasFailedExecution = badges?.hasFailedExecution || false;
 
   useEffect(() => {
     // Clear other theme classes and apply current
@@ -119,6 +113,7 @@ export function AppLayout() {
         { name: 'API Tokens', path: '/tokens', icon: KeyRound },
         { name: 'Templates', path: '/templates', icon: Bookmark },
         { name: 'Activity Log', path: '/activity', icon: ListCollapse },
+        { name: 'Curl Runner', path: '/curl-runner', icon: Play },
         { name: 'JSON Suite', path: '/json-formatter', icon: Settings2 },
       ]
     },
