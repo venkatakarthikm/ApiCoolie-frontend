@@ -23,6 +23,75 @@ import { Button } from '../components/ui/Button.jsx';
 import { apiClient } from '../utils/apiClient.js';
 import { showToast } from '../utils/toast.js';
 
+function parseCurlCommand(raw) {
+  const cleaned = raw.replace(/\\\n/g, ' ').replace(/\\\r\n/g, ' ').trim();
+  const result = { method: 'GET', headers: {}, body: null, url: null };
+
+  const tokens = [];
+  let current = '';
+  let inSingle = false;
+  let inDouble = false;
+  for (let i = 0; i < cleaned.length; i++) {
+    const ch = cleaned[i];
+    if (ch === "'" && !inDouble) { inSingle = !inSingle; continue; }
+    if (ch === '"' && !inSingle) { inDouble = !inDouble; continue; }
+    if (ch === ' ' && !inSingle && !inDouble) {
+      if (current) { tokens.push(current); current = ''; }
+      continue;
+    }
+    current += ch;
+  }
+  if (current) tokens.push(current);
+
+  let i = 0;
+  if (tokens[0] && tokens[0].toLowerCase() === 'curl') i = 1;
+
+  for (; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (t === '-X' || t === '--request') { i++; continue; }
+    if (t === '-H' || t === '--header') { i++; continue; }
+    if (t === '-d' || t === '--data' || t === '--data-raw' || t === '--data-binary') { i++; continue; }
+    if (t === '--url') { i++; continue; }
+    if (t === '-u' || t === '--user') { i++; continue; }
+    if (t === '-b' || t === '--cookie') { i++; continue; }
+    if (t === '-A' || t === '--user-agent') { i++; continue; }
+    if (t === '--compressed' || t === '-k' || t === '--insecure') { continue; }
+    if (t.startsWith('-')) continue;
+    result.url = t;
+    break;
+  }
+
+  for (let j = 1; j < tokens.length; j++) {
+    if ((tokens[j] === '-X' || tokens[j] === '--request') && tokens[j + 1]) {
+      result.method = tokens[j + 1].toUpperCase();
+      break;
+    }
+  }
+
+  for (let j = 1; j < tokens.length; j++) {
+    if ((tokens[j] === '-H' || tokens[j] === '--header') && tokens[j + 1]) {
+      const raw = tokens[j + 1];
+      const colonIdx = raw.indexOf(':');
+      if (colonIdx > 0) {
+        result.headers[raw.substring(0, colonIdx).trim()] = raw.substring(colonIdx + 1).trim();
+      }
+      j++;
+    }
+  }
+
+  for (let j = 1; j < tokens.length; j++) {
+    if (tokens[j] === '-d' || tokens[j] === '--data' || tokens[j] === '--data-raw' || tokens[j] === '--data-binary') {
+      if (tokens[j + 1]) {
+        result.body = tokens[j + 1];
+        if (result.method === 'GET') result.method = 'POST';
+        break;
+      }
+    }
+  }
+
+  return result;
+}
+
 export function CurlRunnerPage() {
   const queryClient = useQueryClient();
   const [curlInput, setCurlInput] = useState('curl https://httpbin.org/get');
@@ -74,12 +143,48 @@ export function CurlRunnerPage() {
     setResponse(null);
     setResponseError(null);
     try {
-      const result = await apiClient.post('/saved-curls/execute', {
-        curlCommand: curlInput,
+      const parsed = parseCurlCommand(curlInput);
+      if (!parsed.url) {
+        setResponseError('Could not parse a valid URL from the curl command.');
+        setRunning(false);
+        return;
+      }
+      const startTime = Date.now();
+      const res = await fetch(parsed.url, {
+        method: parsed.method || 'GET',
+        headers: parsed.headers || {},
+        body: parsed.body || undefined,
+        redirect: 'follow',
       });
-      setResponse(result);
+      const durationMs = Date.now() - startTime;
+
+      const contentType = res.headers.get('content-type') || '';
+      let body;
+      if (contentType.includes('application/json')) {
+        body = await res.json();
+      } else {
+        body = await res.text();
+      }
+
+      const respHeaders = {};
+      res.headers.forEach((value, key) => { respHeaders[key] = value; });
+
+      setResponse({
+        status: res.status,
+        statusText: res.statusText,
+        headers: respHeaders,
+        body,
+        durationMs,
+        url: parsed.url,
+        method: parsed.method || 'GET',
+      });
     } catch (err) {
-      setResponseError(err.message || 'Request failed.');
+      const msg = err.message || 'Request failed.';
+      if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS')) {
+        setResponseError(`${msg}\n\nNote: CORS policy may block requests to APIs that don't allow cross-origin requests from this browser.`);
+      } else {
+        setResponseError(msg);
+      }
     } finally {
       setRunning(false);
     }
